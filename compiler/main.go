@@ -1,17 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	src := "3 + 4"
 
-	lexer := NewLexer(src)
-	for {
-		token := lexer.Next()
-		fmt.Println(token)
+	tokens := Lex(src)
+	parser := NewParser(tokens)
 
-		if token.Type == TokenEOF {
-			break
-		}
+	ast, ok := parser.parseNumber()
+	if !ok {
+		fmt.Println("Parse failed")
 	}
+
+	fmt.Println(ast)
 }

@@ -32,6 +32,7 @@ func (t TokenType) String() string {
 type Token struct {
 	Type    TokenType
 	Literal string
+	Pos     int
 }
 
 func (t Token) String() string {
@@ -66,6 +67,22 @@ func (l *Lexer) Next() Token {
 	}
 }
 
+func Lex(src string) []Token {
+	var tokens []Token
+	lexer := NewLexer(src)
+
+	for {
+		token := lexer.Next()
+		tokens = append(tokens, token)
+
+		if token.Type == TokenEOF {
+			break
+		}
+	}
+
+	return tokens
+}
+
 func (l *Lexer) skipWhitespace() {
 	for l.pos < len(l.src) && unicode.IsSpace(l.src[l.pos]) {
 		l.pos++
@@ -80,11 +97,11 @@ func (l *Lexer) advance(typ TokenType) Token {
 }
 
 func (l *Lexer) make(typ TokenType, lit string) Token {
-	return Token{Type: typ, Literal: lit}
+	return Token{Type: typ, Literal: lit, Pos: l.pos}
 }
 
 func (l *Lexer) makeRange(typ TokenType, start int) Token {
-	return Token{Type: typ, Literal: string(l.src[start:l.pos])}
+	return Token{Type: typ, Literal: string(l.src[start:l.pos]), Pos: start}
 }
 
 func (l *Lexer) readNumber() Token {
