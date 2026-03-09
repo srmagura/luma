@@ -1,33 +1,20 @@
-package main
+package compiler
 
 import (
-	"bytes"
-	"io"
 	"log"
-	"os"
+
+	"github.com/srmagura/luma/shared"
 )
 
-func main() {
-	src := "3 + 4"
-
+func Compile(src string) shared.Node {
 	tokens := Lex(src)
 	ast, ok := Parse(tokens)
 	if !ok {
 		log.Fatal("Parse failed")
 	}
 
-	PrintAST(ast)
-
-	var buf bytes.Buffer
-	EncodeAST(&buf, &ast)
-
-	f, err := os.Create("a.out")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	_, err = io.Copy(f, &buf)
+	shared.PrintAST(ast)
+	return ast
 }
 
 /* BinaryExpr{

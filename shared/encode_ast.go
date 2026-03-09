@@ -1,10 +1,12 @@
-package main
+package shared
 
 import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
 )
+
+// This is not used currently
 
 func registerGobTypes() {
 	gob.Register(IntLiteral{})

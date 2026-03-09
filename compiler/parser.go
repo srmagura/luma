@@ -1,8 +1,14 @@
-package main
+package compiler
 
 import (
 	"strconv"
+
+	"github.com/srmagura/luma/shared"
 )
+
+type Node = shared.Node
+type UnknownNode = shared.UnknownNode
+type IntLiteral = shared.IntLiteral
 
 type Parser struct {
 	tokens []Token
