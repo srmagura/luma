@@ -69,10 +69,6 @@ func printNode(n Node, prefix string, isRoot bool, isLast bool) {
 		}
 	}
 
-	printNodeCore(n, prefix, childPrefix, connector)
-}
-
-func printNodeCore(n Node, prefix string, childPrefix string, connector string) {
 	switch v := n.(type) {
 	case IntLiteral:
 		fmt.Printf("%s%sIntLiteral(%d)\n", prefix, connector, v.Value)
