@@ -13,6 +13,11 @@ func NewParser(tokens []Token) *Parser {
 	return &Parser{tokens: tokens, pos: 0}
 }
 
+func Parse(tokens []Token) (Node, bool) {
+	p := NewParser(tokens)
+	return p.parseNumber()
+}
+
 func (p *Parser) peek() (Token, bool) {
 	if p.pos >= len(p.tokens) {
 		return Token{}, false

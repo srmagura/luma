@@ -2,32 +2,22 @@ package main
 
 import (
 	"bytes"
-	"io"
 	"log"
 	"os"
 )
 
 func main() {
-	src := "3 + 4"
-
-	tokens := Lex(src)
-	ast, ok := Parse(tokens)
-	if !ok {
-		log.Fatal("Parse failed")
-	}
-
-	PrintAST(ast)
-
-	var buf bytes.Buffer
-	EncodeAST(&buf, &ast)
-
-	f, err := os.Create("a.out")
+	data, err := os.ReadFile("../compiler/a.out")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
 
-	_, err = io.Copy(f, &buf)
+	buf := bytes.NewBuffer(data)
+	var ast *Node
+	DecodeAST(buf, &ast)
+
+	PrintAST(*ast)
+
 }
 
 /* BinaryExpr{
