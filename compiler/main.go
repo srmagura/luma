@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 )
 
@@ -28,5 +29,10 @@ func main() {
 			Right: IntLiteral{Value: 2},
 		},
 	}*/
-	PrintAst(ast)
+	var buf bytes.Buffer
+	EncodeAST(&buf, &ast)
+
+	var ast2 *Node
+	DecodeAST(&buf, &ast2)
+	PrintAST(*ast2)
 }

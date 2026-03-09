@@ -51,7 +51,7 @@ func (BinaryExpr) nodeTag()  {}
 
 // --- Pretty printer: indented tree view ---
 
-func PrintAst(n Node) {
+func PrintAST(n Node) {
 	printNode(n, "", true, true)
 }
 
@@ -77,5 +77,8 @@ func printNode(n Node, prefix string, isRoot bool, isLast bool) {
 		fmt.Printf("%s%sBinaryExpr(%q)\n", prefix, connector, v.Op)
 		printNode(v.Left, childPrefix, false, false)
 		printNode(v.Right, childPrefix, false, true)
+
+	default:
+		fmt.Printf("UnknownNode\n")
 	}
 }
