@@ -1,5 +1,27 @@
 package main
 
+import (
+	"fmt"
+)
+
+type Op byte
+
+const (
+	OpAdd Op = iota
+	OpSubtract
+)
+
+func (op Op) String() string {
+	switch op {
+	case OpAdd:
+		return "+"
+	case OpSubtract:
+		return "+"
+	default:
+		return "UnknownOp"
+	}
+}
+
 type Node interface {
 	nodeTag()
 }
@@ -15,15 +37,8 @@ type IntLiteral struct {
 
 // --- Interior nodes ---
 
-type BinaryOp byte
-
-const (
-	Add BinaryOp = iota
-	Subtract
-)
-
 type BinaryExpr struct {
-	Op    BinaryOp
+	Op    Op
 	Left  Node
 	Right Node
 }
@@ -33,3 +48,38 @@ type BinaryExpr struct {
 func (UnknownNode) nodeTag() {}
 func (IntLiteral) nodeTag()  {}
 func (BinaryExpr) nodeTag()  {}
+
+// --- Pretty printer: indented tree view ---
+
+func PrintAst(n Node) {
+	printNode(n, "", true, true)
+}
+
+func printNode(n Node, prefix string, isRoot bool, isLast bool) {
+	connector := ""
+	childPrefix := ""
+
+	if !isRoot {
+		connector = "├── "
+		childPrefix = prefix + "│   "
+
+		if isLast {
+			connector = "└── "
+			childPrefix = prefix + "    "
+		}
+	}
+
+	printNodeCore(n, prefix, childPrefix, connector)
+}
+
+func printNodeCore(n Node, prefix string, childPrefix string, connector string) {
+	switch v := n.(type) {
+	case IntLiteral:
+		fmt.Printf("%s%sIntLiteral(%d)\n", prefix, connector, v.Value)
+
+	case BinaryExpr:
+		fmt.Printf("%s%sBinaryExpr(%q)\n", prefix, connector, v.Op)
+		printNode(v.Left, childPrefix, false, false)
+		printNode(v.Right, childPrefix, false, true)
+	}
+}

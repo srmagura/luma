@@ -15,5 +15,18 @@ func main() {
 		fmt.Println("Parse failed")
 	}
 
-	fmt.Println(ast)
+	/* BinaryExpr{
+		Op: OpAdd,
+		Left: BinaryExpr{
+			Op:    OpSubtract,
+			Left:  IntLiteral{Value: 1},
+			Right: IntLiteral{Value: 2},
+		},
+		Right: BinaryExpr{
+			Op:    OpSubtract,
+			Left:  IntLiteral{Value: 1},
+			Right: IntLiteral{Value: 2},
+		},
+	}*/
+	PrintAst(ast)
 }
