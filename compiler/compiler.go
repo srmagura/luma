@@ -1,20 +1,22 @@
 package compiler
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/srmagura/luma/shared"
 )
 
-func Compile(src string) shared.Node {
+func Compile(src string) (shared.Node, bool) {
 	tokens := Lex(src)
 	ast, ok := Parse(tokens)
+
 	if !ok {
-		log.Fatal("Parse failed")
+		fmt.Println("Compilation failed")
+		return shared.UnknownNode{}, false
 	}
 
 	shared.PrintAST(ast)
-	return ast
+	return ast, true
 }
 
 /* BinaryExpr{

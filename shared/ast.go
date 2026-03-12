@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Op byte
@@ -52,10 +53,17 @@ func (BinaryExpr) nodeTag()  {}
 // --- Pretty printer: indented tree view ---
 
 func PrintAST(n Node) {
-	printNode(n, "", true, true)
+	fmt.Print(StringifyAST(n))
 }
 
-func printNode(n Node, prefix string, isRoot bool, isLast bool) {
+func StringifyAST(n Node) string {
+	var sb strings.Builder
+	stringifyNode(sb, n, "", true, true)
+
+	return sb.String()
+}
+
+func stringifyNode(sb strings.Builder, n Node, prefix string, isRoot bool, isLast bool) {
 	connector := ""
 	childPrefix := ""
 
@@ -71,14 +79,14 @@ func printNode(n Node, prefix string, isRoot bool, isLast bool) {
 
 	switch v := n.(type) {
 	case IntLiteral:
-		fmt.Printf("%s%sIntLiteral(%d)\n", prefix, connector, v.Value)
+		fmt.Fprintf(&sb, "%s%sIntLiteral(%d)\n", prefix, connector, v.Value)
 
 	case BinaryExpr:
-		fmt.Printf("%s%sBinaryExpr(%q)\n", prefix, connector, v.Op)
-		printNode(v.Left, childPrefix, false, false)
-		printNode(v.Right, childPrefix, false, true)
+		fmt.Fprintf(&sb, "%s%sBinaryExpr(%q)\n", prefix, connector, v.Op)
+		stringifyNode(sb, v.Left, childPrefix, false, false)
+		stringifyNode(sb, v.Right, childPrefix, false, true)
 
 	default:
-		fmt.Printf("UnknownNode\n")
+		fmt.Fprintf(&sb, "UnknownNode\n")
 	}
 }
