@@ -67,7 +67,7 @@ func (l *Lexer) Next() Token {
 	}
 }
 
-func Lex(src string) []Token {
+func lex(src string) []Token {
 	var tokens []Token
 	lexer := NewLexer(src)
 

@@ -10,9 +10,9 @@ import (
 func main() {
 	src := "3 + 4"
 
-	ast, ok := compiler.Compile(src)
-	if !ok {
-		log.Fatalln("Compilation failed.")
+	ast, err := compiler.Compile(src)
+	if err != nil {
+		log.Fatalln(err.Error())
 	}
 
 	runtime.Execute(ast)

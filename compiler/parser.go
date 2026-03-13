@@ -2,13 +2,7 @@ package compiler
 
 import (
 	"strconv"
-
-	"github.com/srmagura/luma/shared"
 )
-
-type Node = shared.Node
-type UnknownNode = shared.UnknownNode
-type IntLiteral = shared.IntLiteral
 
 type Parser struct {
 	tokens []Token
@@ -19,9 +13,17 @@ func NewParser(tokens []Token) *Parser {
 	return &Parser{tokens: tokens, pos: 0}
 }
 
-func Parse(tokens []Token) (Node, bool) {
+func Parse(tokens []Token) (Node, error) {
 	p := NewParser(tokens)
-	return p.parseNumber()
+	ast, err := p.parseNumber()
+	return ast, err
+}
+
+func (p *Parser) error(message string) (Node, error) {
+	return nil, &InternalParserError{
+		message: message,
+		pos:     p.pos,
+	}
 }
 
 func (p *Parser) peek() (Token, bool) {
@@ -52,30 +54,21 @@ func (p *Parser) consume(expected TokenType) (Token, bool) {
 // 	left, ok := p.parseFactor()
 // }
 
-// Handle literals and parenthesized expressions
-// func (p *Parser) parseFactor() (Node, bool) {
-// 	token, ok := p.peek()
-// 	if !ok {
-// 		return Node{}, false
-// 	}
+func (p *Parser) parseNumber() (Node, error) {
+	token, ok := p.peek()
+	if !ok || token.Type != TokenNumber {
+		return nil, nil
+	}
 
-// 	if token.Type == TokenNumber {
-// 		return p.parseNumber()
-// 	}
-
-// 	return Node{}, false
-// }
-
-func (p *Parser) parseNumber() (Node, bool) {
-	token, ok := p.consume(TokenNumber)
+	token, ok = p.consume(TokenNumber)
 	if !ok {
-		return UnknownNode{}, false
+		return nil, nil
 	}
 
 	n, err := strconv.Atoi(token.Literal)
 	if err != nil {
-		return UnknownNode{}, false
+		return p.error("Failed to parse int")
 	}
 
-	return IntLiteral{Value: n, Pos: token.Pos}, true
+	return IntLiteral{Value: n, Pos: token.Pos}, nil
 }

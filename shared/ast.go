@@ -29,8 +29,6 @@ type Node interface {
 
 // --- Leaf nodes ---
 
-type UnknownNode struct{}
-
 type IntLiteral struct {
 	Value int
 	Pos   int
@@ -46,9 +44,8 @@ type BinaryExpr struct {
 
 // --- Implement the sealed interface ---
 
-func (UnknownNode) nodeTag() {}
-func (IntLiteral) nodeTag()  {}
-func (BinaryExpr) nodeTag()  {}
+func (IntLiteral) nodeTag() {}
+func (BinaryExpr) nodeTag() {}
 
 // --- Pretty printer: indented tree view ---
 
