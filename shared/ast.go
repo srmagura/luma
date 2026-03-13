@@ -58,12 +58,12 @@ func PrintAST(n Node) {
 
 func StringifyAST(n Node) string {
 	var sb strings.Builder
-	stringifyNode(sb, n, "", true, true)
+	stringifyNode(&sb, n, "", true, true)
 
 	return sb.String()
 }
 
-func stringifyNode(sb strings.Builder, n Node, prefix string, isRoot bool, isLast bool) {
+func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLast bool) {
 	connector := ""
 	childPrefix := ""
 
@@ -79,14 +79,14 @@ func stringifyNode(sb strings.Builder, n Node, prefix string, isRoot bool, isLas
 
 	switch v := n.(type) {
 	case IntLiteral:
-		fmt.Fprintf(&sb, "%s%sIntLiteral(%d)\n", prefix, connector, v.Value)
+		fmt.Fprintf(sb, "%s%sIntLiteral(%d)\n", prefix, connector, v.Value)
 
 	case BinaryExpr:
-		fmt.Fprintf(&sb, "%s%sBinaryExpr(%q)\n", prefix, connector, v.Op)
+		fmt.Fprintf(sb, "%s%sBinaryExpr(%q)\n", prefix, connector, v.Op)
 		stringifyNode(sb, v.Left, childPrefix, false, false)
 		stringifyNode(sb, v.Right, childPrefix, false, true)
 
 	default:
-		fmt.Fprintf(&sb, "UnknownNode\n")
+		fmt.Fprintf(sb, "UnknownNode\n")
 	}
 }
