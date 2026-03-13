@@ -19,12 +19,12 @@ func compareASTs(t *testing.T, expected shared.Node, actual shared.Node) {
 
 	for i := 0; i < min(len(expectedLines), len(actualLines)); i++ {
 		if expectedLines[i] != actualLines[i] {
-			t.Fatalf("Difference at line %d\n", i)
+			t.Errorf("Difference at line %d\n", i)
 		}
 	}
 
 	if len(expectedLines) != len(actualLines) {
-		t.Fatalf("Expected had %d lines while actual had %d lines\n", len(expectedLines), len(actualLines))
+		t.Errorf("Expected had %d lines while actual had %d lines\n", len(expectedLines), len(actualLines))
 	}
 }
 
