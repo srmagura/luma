@@ -7,7 +7,7 @@ import (
 	"github.com/srmagura/luma/shared"
 )
 
-func diffASTs(t *testing.T, expected shared.Node, actual shared.Node) {
+func compareASTs(t *testing.T, expected shared.Node, actual shared.Node) {
 	expectedString := shared.StringifyAST(expected)
 	actualString := shared.StringifyAST(actual)
 
@@ -35,5 +35,5 @@ func TestIntLiteral(t *testing.T) {
 	}
 
 	expected := IntLiteral{Value: 2}
-	diffASTs(t, expected, actual)
+	compareASTs(t, expected, actual)
 }
