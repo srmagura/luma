@@ -1,3 +1,9 @@
+# The Luma Programming Language
+
+An interpreted programming language with compile-time type safety.
+
+## Development
+
 Example testing commands:
 
 ```shell
