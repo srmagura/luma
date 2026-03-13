@@ -8,6 +8,12 @@ import (
 	"github.com/srmagura/luma/shared"
 )
 
+type (
+	Node       = shared.Node
+	IntLiteral = shared.IntLiteral
+	BinaryExpr = shared.BinaryExpr
+)
+
 func testFailedCompilation(t *testing.T, src string, expectedMessage string, expectedLine int) {
 	_, err := Compile(src)
 
@@ -39,7 +45,7 @@ func compareASTs(t *testing.T, expected shared.Node, actual shared.Node) {
 
 	for i := 0; i < min(len(expectedLines), len(actualLines)); i++ {
 		if expectedLines[i] != actualLines[i] {
-			t.Fatalf("Difference at line %d\n", i)
+			t.Fatalf("Difference at line %d\n", i+1)
 		}
 	}
 
@@ -69,16 +75,26 @@ func TestIntLiteral(t *testing.T) {
 	testSuccessfulCompilation(t, src, expected)
 }
 
-/* BinaryExpr{
-	Op: OpAdd,
-	Left: BinaryExpr{
-		Op:    OpSubtract,
-		Left:  IntLiteral{Value: 1},
-		Right: IntLiteral{Value: 2},
-	},
-	Right: BinaryExpr{
-		Op:    OpSubtract,
-		Left:  IntLiteral{Value: 1},
-		Right: IntLiteral{Value: 2},
-	},
-}*/
+func TestAddition1(t *testing.T) {
+	src := "2 + 3"
+	expected := BinaryExpr{
+		Op:    shared.OpAdd,
+		Left:  IntLiteral{Value: 2},
+		Right: IntLiteral{Value: 3},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}
+
+func TestAddition2(t *testing.T) {
+	src := "2 - 3 + 4"
+	expected := BinaryExpr{
+		Op: shared.OpAdd,
+		Left: BinaryExpr{
+			Op:    shared.OpSubtract,
+			Left:  IntLiteral{Value: 2},
+			Right: IntLiteral{Value: 3},
+		},
+		Right: IntLiteral{Value: 4},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}

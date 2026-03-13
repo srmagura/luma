@@ -17,7 +17,7 @@ func (op Op) String() string {
 	case OpAdd:
 		return "+"
 	case OpSubtract:
-		return "+"
+		return "-"
 	default:
 		return "UnknownOp"
 	}
@@ -79,7 +79,7 @@ func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLa
 		fmt.Fprintf(sb, "%s%sIntLiteral(%d)\n", prefix, connector, v.Value)
 
 	case BinaryExpr:
-		fmt.Fprintf(sb, "%s%sBinaryExpr(%q)\n", prefix, connector, v.Op)
+		fmt.Fprintf(sb, "%s%sBinaryExpr(%s)\n", prefix, connector, v.Op)
 		stringifyNode(sb, v.Left, childPrefix, false, false)
 		stringifyNode(sb, v.Right, childPrefix, false, true)
 

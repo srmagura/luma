@@ -12,6 +12,7 @@ const (
 	TokenEOF
 	TokenNumber
 	TokenPlus
+	TokenMinus
 )
 
 func (t TokenType) String() string {
@@ -24,6 +25,8 @@ func (t TokenType) String() string {
 		return "Number"
 	case TokenPlus:
 		return "Plus"
+	case TokenMinus:
+		return "Minus"
 	default:
 		return "Could not convert TokenType to string"
 	}
@@ -62,6 +65,8 @@ func (l *Lexer) Next() Token {
 		return l.readNumber()
 	case ch == '+':
 		return l.advance(TokenPlus)
+	case ch == '-':
+		return l.advance(TokenMinus)
 	default:
 		return l.advance(TokenUnknown)
 	}

@@ -9,12 +9,7 @@ import (
 	"github.com/srmagura/luma/shared"
 )
 
-type (
-	Node       = shared.Node
-	IntLiteral = shared.IntLiteral
-)
-
-func Compile(src string) (Node, error) {
+func Compile(src string) (shared.Node, error) {
 	src = NormalizeSource(src)
 	tokens := lex(src)
 
