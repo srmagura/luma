@@ -2,14 +2,15 @@ package runtime
 
 import (
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/srmagura/luma/shared"
 )
 
-func Execute(ast shared.Node) {
+func Execute(ast shared.Node, out io.Writer) {
 	i := evalExpr(ast)
-	fmt.Println(i)
+	fmt.Fprintln(out, i)
 }
 
 func evalExpr(n shared.Node) int {

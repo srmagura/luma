@@ -27,5 +27,5 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	runtime.Execute(ast)
+	runtime.Execute(ast, os.Stdout)
 }
