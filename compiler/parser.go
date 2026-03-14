@@ -18,6 +18,11 @@ func NewParser(tokens []Token) *Parser {
 func Parse(tokens []Token) (shared.Node, error) {
 	p := NewParser(tokens)
 	ast, err := p.parseAdditiveExpr()
+
+	if ast == nil {
+		return p.error("Parsing failed")
+	}
+
 	return ast, err
 }
 
@@ -53,6 +58,10 @@ func (p *Parser) consumeExpected(expected TokenType) (Token, bool) {
 
 func (p *Parser) consume() (Token, bool) {
 	return p.consumeExpected(TokenUnknown)
+}
+
+func (p *Parser) parseExpr() (shared.Node, error) {
+	return p.parseAdditiveExpr()
 }
 
 // Handle + and -
@@ -94,7 +103,7 @@ func (p *Parser) parseAdditiveExpr() (shared.Node, error) {
 
 // Handle *, /, and ~/
 func (p *Parser) parseMultiplicativeExpr() (shared.Node, error) {
-	left, err := p.parseNumber()
+	left, err := p.parseCall()
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +129,7 @@ func (p *Parser) parseMultiplicativeExpr() (shared.Node, error) {
 			op = shared.OpDivideInteger
 		}
 
-		right, err := p.parseNumber()
+		right, err := p.parseCall()
 		if err != nil {
 			return nil, err
 		}
@@ -129,6 +138,78 @@ func (p *Parser) parseMultiplicativeExpr() (shared.Node, error) {
 	}
 
 	return left, nil
+}
+
+func (p *Parser) parseCall() (shared.Node, error) {
+	left, err := p.parseLeaf()
+	if err != nil {
+		return nil, err
+	}
+
+	// Does not handle parenthesized functions (yet?)
+	switch v := left.(type) {
+	case shared.IdentNode:
+		token, ok := p.peek()
+		if !ok || token.Type != TokenLParen {
+			return nil, nil
+		}
+
+		token, ok = p.consumeExpected(TokenLParen)
+		if !ok {
+			return nil, nil
+		}
+
+		token, ok = p.peek()
+		if !ok || token.Type != TokenRParen {
+			return nil, nil
+		}
+
+		token, ok = p.consumeExpected(TokenRParen)
+		if !ok {
+			return nil, nil
+		}
+
+		left = shared.CallExpr{
+			Func: v,
+			Args: []shared.Node{},
+		}
+	}
+
+	return left, nil
+}
+
+func (p *Parser) parseLeaf() (shared.Node, error) {
+	node, err := p.parseIdent()
+	if err != nil {
+		return nil, err
+	}
+	if node != nil {
+		return node, nil
+	}
+
+	node, err = p.parseNumber()
+	if err != nil {
+		return nil, err
+	}
+	if node != nil {
+		return node, nil
+	}
+
+	return nil, nil
+}
+
+func (p *Parser) parseIdent() (shared.Node, error) {
+	token, ok := p.peek()
+	if !ok || token.Type != TokenIdent {
+		return nil, nil
+	}
+
+	token, ok = p.consumeExpected(TokenIdent)
+	if !ok {
+		return nil, nil
+	}
+
+	return shared.IdentNode{Name: token.Literal, Pos: token.Pos}, nil
 }
 
 func (p *Parser) parseNumber() (shared.Node, error) {

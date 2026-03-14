@@ -43,6 +43,11 @@ type IntLiteral struct {
 	Pos   int
 }
 
+type IdentNode struct {
+	Name string
+	Pos  int
+}
+
 // --- Interior nodes ---
 
 type BinaryExpr struct {
@@ -51,10 +56,17 @@ type BinaryExpr struct {
 	Right Node
 }
 
+type CallExpr struct {
+	Func Node
+	Args []Node
+}
+
 // --- Implement the sealed interface ---
 
 func (IntLiteral) nodeTag() {}
+func (IdentNode) nodeTag()  {}
 func (BinaryExpr) nodeTag() {}
+func (CallExpr) nodeTag()   {}
 
 // --- Pretty printer: indented tree view ---
 
@@ -87,10 +99,21 @@ func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLa
 	case IntLiteral:
 		fmt.Fprintf(sb, "%s%sIntLiteral(%d)\n", prefix, connector, v.Value)
 
+	case IdentNode:
+		fmt.Fprintf(sb, "%s%sIdentNode(%s)\n", prefix, connector, v.Name)
+
 	case BinaryExpr:
 		fmt.Fprintf(sb, "%s%sBinaryExpr(%s)\n", prefix, connector, v.Op)
 		stringifyNode(sb, v.Left, childPrefix, false, false)
 		stringifyNode(sb, v.Right, childPrefix, false, true)
+
+	case CallExpr:
+		fmt.Fprintf(sb, "%s%sCallExpr\n", prefix, connector)
+		stringifyNode(sb, v.Func, childPrefix, false, false)
+
+		for i, arg := range v.Args {
+			stringifyNode(sb, arg, childPrefix, false, i == len(v.Args)-1)
+		}
 
 	default:
 		fmt.Fprintf(sb, "UnknownNode\n")

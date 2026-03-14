@@ -11,7 +11,9 @@ import (
 type (
 	Node       = shared.Node
 	IntLiteral = shared.IntLiteral
+	IdentNode  = shared.IdentNode
 	BinaryExpr = shared.BinaryExpr
+	CallExpr   = shared.CallExpr
 )
 
 func testFailedCompilation(t *testing.T, src string, expectedMessage string, expectedLine int) {
@@ -103,6 +105,30 @@ func TestMultiplication(t *testing.T) {
 			Right: IntLiteral{Value: 3},
 		},
 		Right: IntLiteral{Value: 7},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}
+
+func TestCall1(t *testing.T) {
+	src := "print()"
+	expected := CallExpr{
+		Func: IdentNode{Name: "print"},
+		Args: []Node{},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}
+
+func TestCall2(t *testing.T) {
+	src := "print(2 * 3)"
+	expected := CallExpr{
+		Func: IdentNode{Name: "print"},
+		Args: []Node{
+			BinaryExpr{
+				Op:    shared.OpMultiply,
+				Left:  IntLiteral{Value: 2},
+				Right: IntLiteral{Value: 3},
+			},
+		},
 	}
 	testSuccessfulCompilation(t, src, expected)
 }
