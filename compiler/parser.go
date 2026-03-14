@@ -57,7 +57,7 @@ func (p *Parser) consume() (Token, bool) {
 
 // Handle + and -
 func (p *Parser) parseAdditiveExpr() (shared.Node, error) {
-	result, err := p.parseNumber()
+	left, err := p.parseMultiplicativeExpr()
 	if err != nil {
 		return nil, err
 	}
@@ -81,15 +81,54 @@ func (p *Parser) parseAdditiveExpr() (shared.Node, error) {
 			op = shared.OpSubtract
 		}
 
+		right, err := p.parseMultiplicativeExpr()
+		if err != nil {
+			return nil, err
+		}
+
+		left = shared.BinaryExpr{Op: op, Left: left, Right: right}
+	}
+
+	return left, nil
+}
+
+// Handle *, /, and ~/
+func (p *Parser) parseMultiplicativeExpr() (shared.Node, error) {
+	left, err := p.parseNumber()
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		peeked, ok := p.peek()
+		if !ok || (peeked.Type != TokenStar && peeked.Type != TokenFSlash && peeked.Type != TokenTildeFSlash) {
+			break
+		}
+
+		opToken, ok := p.consume()
+		if !ok {
+			return nil, nil
+		}
+
+		var op shared.Op
+		switch opToken.Type {
+		case TokenStar:
+			op = shared.OpMultiply
+		case TokenFSlash:
+			op = shared.OpDivide
+		case TokenTildeFSlash:
+			op = shared.OpDivideInteger
+		}
+
 		right, err := p.parseNumber()
 		if err != nil {
 			return nil, err
 		}
 
-		result = shared.BinaryExpr{Op: op, Left: result, Right: right}
+		left = shared.BinaryExpr{Op: op, Left: left, Right: right}
 	}
 
-	return result, nil
+	return left, nil
 }
 
 func (p *Parser) parseNumber() (shared.Node, error) {

@@ -10,6 +10,9 @@ type Op byte
 const (
 	OpAdd Op = iota
 	OpSubtract
+	OpMultiply
+	OpDivide
+	OpDivideInteger
 )
 
 func (op Op) String() string {
@@ -18,6 +21,12 @@ func (op Op) String() string {
 		return "+"
 	case OpSubtract:
 		return "-"
+	case OpMultiply:
+		return "*"
+	case OpDivide:
+		return "/"
+	case OpDivideInteger:
+		return "~/"
 	default:
 		return "UnknownOp"
 	}

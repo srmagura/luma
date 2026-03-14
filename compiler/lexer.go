@@ -13,6 +13,9 @@ const (
 	TokenNumber
 	TokenPlus
 	TokenMinus
+	TokenStar
+	TokenFSlash
+	TokenTildeFSlash
 	TokenLParen
 	TokenRParen
 	TokenIdent
@@ -30,6 +33,12 @@ func (t TokenType) String() string {
 		return "Plus"
 	case TokenMinus:
 		return "Minus"
+	case TokenStar:
+		return "Star"
+	case TokenFSlash:
+		return "FSlash"
+	case TokenTildeFSlash:
+		return "TildeFSlash"
 	case TokenLParen:
 		return "LParen"
 	case TokenRParen:
@@ -78,6 +87,12 @@ func (l *Lexer) Next() Token {
 		return l.advance(TokenPlus)
 	case ch == '-':
 		return l.advance(TokenMinus)
+	case ch == '*':
+		return l.advance(TokenStar)
+	case ch == '/':
+		return l.advance(TokenFSlash)
+	case ch == '~':
+		return l.readTildeFSlash()
 	case ch == '(':
 		return l.advance(TokenLParen)
 	case ch == ')':
@@ -130,6 +145,8 @@ func (l *Lexer) readIdent() Token {
 	// First character must be letter or underscore
 	if unicode.IsLetter(l.src[l.pos]) || l.src[l.pos] == '_' {
 		l.pos++
+	} else {
+		return Token{}
 	}
 
 	// Additional characters can be letter, underscore, or number
@@ -147,6 +164,10 @@ func (l *Lexer) readNumber() Token {
 		l.pos++
 	}
 
+	if l.pos == start {
+		return Token{}
+	}
+
 	// Optional decimal part
 	if l.pos < len(l.src) && l.src[l.pos] == '.' {
 		l.pos++
@@ -156,4 +177,15 @@ func (l *Lexer) readNumber() Token {
 	}
 
 	return l.makeRange(TokenNumber, start)
+}
+
+func (l *Lexer) readTildeFSlash() Token {
+	start := l.pos
+
+	if l.pos+1 < len(l.src) && l.src[l.pos] == '~' && l.src[l.pos+1] == '/' {
+		l.pos += 2
+		return l.makeRange(TokenTildeFSlash, start)
+	}
+
+	return Token{}
 }

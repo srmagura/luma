@@ -75,17 +75,7 @@ func TestIntLiteral(t *testing.T) {
 	testSuccessfulCompilation(t, src, expected)
 }
 
-func TestAddition1(t *testing.T) {
-	src := "2 + 3"
-	expected := BinaryExpr{
-		Op:    shared.OpAdd,
-		Left:  IntLiteral{Value: 2},
-		Right: IntLiteral{Value: 3},
-	}
-	testSuccessfulCompilation(t, src, expected)
-}
-
-func TestAddition2(t *testing.T) {
+func TestAddition(t *testing.T) {
 	src := "2 - 3 + 4"
 	expected := BinaryExpr{
 		Op: shared.OpAdd,
@@ -95,6 +85,24 @@ func TestAddition2(t *testing.T) {
 			Right: IntLiteral{Value: 3},
 		},
 		Right: IntLiteral{Value: 4},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}
+
+func TestMultiplication(t *testing.T) {
+	src := "5 / 2 * 3 ~/ 7"
+	expected := BinaryExpr{
+		Op: shared.OpDivideInteger,
+		Left: BinaryExpr{
+			Op: shared.OpMultiply,
+			Left: BinaryExpr{
+				Op:    shared.OpDivide,
+				Left:  IntLiteral{Value: 5},
+				Right: IntLiteral{Value: 2},
+			},
+			Right: IntLiteral{Value: 3},
+		},
+		Right: IntLiteral{Value: 7},
 	}
 	testSuccessfulCompilation(t, src, expected)
 }
