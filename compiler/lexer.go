@@ -13,6 +13,9 @@ const (
 	TokenNumber
 	TokenPlus
 	TokenMinus
+	TokenLParen
+	TokenRParen
+	TokenIdent
 )
 
 func (t TokenType) String() string {
@@ -27,6 +30,12 @@ func (t TokenType) String() string {
 		return "Plus"
 	case TokenMinus:
 		return "Minus"
+	case TokenLParen:
+		return "LParen"
+	case TokenRParen:
+		return "RParen"
+	case TokenIdent:
+		return "Ident"
 	default:
 		return "Could not convert TokenType to string"
 	}
@@ -61,28 +70,34 @@ func (l *Lexer) Next() Token {
 	ch := l.src[l.pos]
 
 	switch {
+	case unicode.IsLetter(ch) || ch == '_':
+		return l.readIdent()
 	case unicode.IsDigit(ch):
 		return l.readNumber()
 	case ch == '+':
 		return l.advance(TokenPlus)
 	case ch == '-':
 		return l.advance(TokenMinus)
+	case ch == '(':
+		return l.advance(TokenLParen)
+	case ch == ')':
+		return l.advance(TokenRParen)
 	default:
 		return l.advance(TokenUnknown)
 	}
 }
 
-func lex(src string) []Token {
+func Lex(src string) []Token {
 	var tokens []Token
 	lexer := NewLexer(src)
 
 	for {
 		token := lexer.Next()
-		tokens = append(tokens, token)
-
 		if token.Type == TokenEOF {
 			break
 		}
+
+		tokens = append(tokens, token)
 	}
 
 	return tokens
@@ -107,6 +122,22 @@ func (l *Lexer) make(typ TokenType, lit string) Token {
 
 func (l *Lexer) makeRange(typ TokenType, start int) Token {
 	return Token{Type: typ, Literal: string(l.src[start:l.pos]), Pos: start}
+}
+
+func (l *Lexer) readIdent() Token {
+	start := l.pos
+
+	// First character must be letter or underscore
+	if unicode.IsLetter(l.src[l.pos]) || l.src[l.pos] == '_' {
+		l.pos++
+	}
+
+	// Additional characters can be letter, underscore, or number
+	for l.pos < len(l.src) && (unicode.IsLetter(l.src[l.pos]) || l.src[l.pos] == '_' || unicode.IsDigit(l.src[l.pos])) {
+		l.pos++
+	}
+
+	return l.makeRange(TokenIdent, start)
 }
 
 func (l *Lexer) readNumber() Token {

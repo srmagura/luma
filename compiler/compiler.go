@@ -11,7 +11,7 @@ import (
 
 func Compile(src string) (shared.Node, error) {
 	src = NormalizeSource(src)
-	tokens := lex(src)
+	tokens := Lex(src)
 
 	for _, token := range tokens {
 		if token.Type == TokenUnknown {
