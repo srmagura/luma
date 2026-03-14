@@ -109,7 +109,7 @@ func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLa
 
 	case CallExpr:
 		fmt.Fprintf(sb, "%s%sCallExpr\n", prefix, connector)
-		stringifyNode(sb, v.Func, childPrefix, false, false)
+		stringifyNode(sb, v.Func, childPrefix, false, len(v.Args) == 0)
 
 		for i, arg := range v.Args {
 			stringifyNode(sb, arg, childPrefix, false, i == len(v.Args)-1)

@@ -132,3 +132,26 @@ func TestCall2(t *testing.T) {
 	}
 	testSuccessfulCompilation(t, src, expected)
 }
+
+func TestCall3(t *testing.T) {
+	src := "print(2 * 3, 4, 5)"
+	expected := CallExpr{
+		Func: IdentNode{Name: "print"},
+		Args: []Node{
+			BinaryExpr{
+				Op:    shared.OpMultiply,
+				Left:  IntLiteral{Value: 2},
+				Right: IntLiteral{Value: 3},
+			},
+			IntLiteral{Value: 4},
+			IntLiteral{Value: 5},
+		},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}
+
+func TestCall4(t *testing.T) {
+	src := "print(2 4)"
+	expectedMessage := "Arguments were not separated by a comma in a call expression"
+	testFailedCompilation(t, src, expectedMessage, 0)
+}

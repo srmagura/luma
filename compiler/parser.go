@@ -17,8 +17,11 @@ func NewParser(tokens []Token) *Parser {
 
 func Parse(tokens []Token) (shared.Node, error) {
 	p := NewParser(tokens)
-	ast, err := p.parseAdditiveExpr()
+	ast, err := p.parseExpr()
 
+	if err != nil {
+		return nil, err
+	}
 	if ast == nil {
 		return p.error("Parsing failed")
 	}
@@ -159,9 +162,36 @@ func (p *Parser) parseCall() (shared.Node, error) {
 			return nil, nil
 		}
 
-		token, ok = p.peek()
-		if !ok || token.Type != TokenRParen {
-			return nil, nil
+		args := []shared.Node{}
+
+		// TODO support more than one arg
+		for {
+			token, ok = p.peek()
+			if !ok {
+				return p.error("Reached end while parsing call expression")
+			}
+			if token.Type == TokenRParen {
+				break
+			}
+
+			arg, err := p.parseExpr()
+			if arg == nil || err != nil {
+				return nil, err
+			}
+
+			args = append(args, arg)
+
+			token, ok = p.peek()
+			if !ok {
+				return p.error("Reached end while parsing call expression")
+			}
+			if token.Type != TokenRParen {
+				if token.Type == TokenComma {
+					p.consumeExpected(TokenComma)
+				} else {
+					return p.error("Arguments were not separated by a comma in a call expression")
+				}
+			}
 		}
 
 		token, ok = p.consumeExpected(TokenRParen)
@@ -171,7 +201,7 @@ func (p *Parser) parseCall() (shared.Node, error) {
 
 		left = shared.CallExpr{
 			Func: v,
-			Args: []shared.Node{},
+			Args: args,
 		}
 	}
 
