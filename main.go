@@ -27,5 +27,8 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	runtime.Execute(ast, os.Stdout)
+	err = runtime.Execute(ast, os.Stdout)
+	if err != nil {
+		os.Exit(1)
+	}
 }

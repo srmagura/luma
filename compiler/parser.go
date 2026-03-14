@@ -31,8 +31,8 @@ func Parse(tokens []Token) (shared.Node, error) {
 
 func (p *Parser) error(message string) (shared.Node, error) {
 	return nil, &InternalParserError{
-		message: message,
-		pos:     p.pos,
+		Message: message,
+		Pos:     p.pos,
 	}
 }
 

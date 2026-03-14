@@ -3,8 +3,8 @@ package compiler
 import "fmt"
 
 type InternalParserError struct {
-	message string
-	pos     int
+	Message string
+	Pos     int
 }
 
 type ParserError struct {
@@ -14,7 +14,7 @@ type ParserError struct {
 }
 
 func (e *InternalParserError) Error() string {
-	return fmt.Sprintf("%d: %s", e.pos, e.message)
+	return fmt.Sprintf("%d: %s", e.Pos, e.Message)
 }
 
 func (e *ParserError) Error() string {

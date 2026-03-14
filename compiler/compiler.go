@@ -33,10 +33,10 @@ func Compile(src string) (shared.Node, error) {
 			log.Fatalln("Could not cast error to ParserError")
 		}
 
-		line, col := GetLineColFromPosition(src, internalParserErr.pos)
+		line, col := GetLineColFromPosition(src, internalParserErr.Pos)
 
 		return nil, &ParserError{
-			Message: internalParserErr.message,
+			Message: internalParserErr.Message,
 			Line:    line,
 			Col:     col,
 		}

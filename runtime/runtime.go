@@ -3,7 +3,6 @@ package runtime
 import (
 	"fmt"
 	"io"
-	"log"
 	"strconv"
 	"strings"
 
@@ -14,53 +13,75 @@ type env struct {
 	out io.Writer
 }
 
-func Execute(ast shared.Node, out io.Writer) {
+func Execute(ast shared.Node, out io.Writer) error {
 	env := &env{out: out}
-	env.evalExpr(ast)
+
+	_, err := env.evalExpr(ast)
+	if err != nil {
+		fmt.Fprintln(env.out, err.Error())
+	}
+
+	return err
 }
 
-func (env *env) evalExpr(n shared.Node) int {
+func (env *env) evalExpr(n shared.Node) (int, error) {
+
 	switch v := n.(type) {
 	case shared.IntLiteral:
-		return v.Value
+		return v.Value, nil
 	case shared.BinaryExpr:
 		return env.evalBinaryExpr(v)
 	case shared.CallExpr:
 		return env.evalCallExpr(v)
 	default:
-		log.Fatal("eval: Unexpected node type: ", n)
-		return 0
+		return 0, &internalRuntimeError{
+			message: fmt.Sprintf("evalExpr: Unexpected node type: %s", n),
+			pos:     0, // TODO
+		}
 	}
 }
 
-func (env *env) evalBinaryExpr(n shared.BinaryExpr) int {
-	left := env.evalExpr(n.Left)
-	right := env.evalExpr(n.Right)
+func (env *env) evalBinaryExpr(n shared.BinaryExpr) (int, error) {
+	left, err := env.evalExpr(n.Left)
+	if err != nil {
+		return 0, err
+	}
+
+	right, err := env.evalExpr(n.Right)
+	if err != nil {
+		return 0, err
+	}
 
 	switch n.Op {
 	case shared.OpAdd:
-		return left + right
+		return left + right, nil
 	case shared.OpSubtract:
-		return left - right
+		return left - right, nil
 	case shared.OpMultiply:
-		return left * right
+		return left * right, nil
 		// TODO implement
 		//case shared.OpDivide:
 		//	return left / right
 	case shared.OpDivideInteger:
-		return left / right
+		return left / right, nil
 	default:
-		// TODO error handling
-		log.Fatal("Unexpected binary operator: ", n.Op)
-		return 0
+		return 0, &internalRuntimeError{
+			message: fmt.Sprintf("Unexpected binary operator: %s", n.Op),
+			pos:     0, // TODO
+		}
 	}
 }
 
-func (env *env) evalCallExpr(n shared.CallExpr) int {
+func (env *env) evalCallExpr(n shared.CallExpr) (int, error) {
 	args := make([]int, len(n.Args))
 
 	for i, v := range n.Args {
-		args[i] = env.evalExpr(v)
+		arg, err := env.evalExpr(v)
+		if err != nil {
+			return 0, err
+		}
+
+		args[i] = arg
 	}
 
 	switch v := n.Func.(type) {
@@ -70,16 +91,19 @@ func (env *env) evalCallExpr(n shared.CallExpr) int {
 		}
 
 		// TODO allow other functions
-		log.Fatal("print is the only valid function currently")
-		return 0
+		return 0, &internalRuntimeError{
+			message: "print is the only valid function currently",
+			pos:     v.Pos,
+		}
 	default:
-		// TODO error handling
-		log.Fatal("Only identifiers are valid as a function")
-		return 0
+		return 0, &internalRuntimeError{
+			message: "Only identifiers are valid as a function",
+			pos:     0, // TODO
+		}
 	}
 }
 
-func (env *env) evalPrint(args []int) int {
+func (env *env) evalPrint(args []int) (int, error) {
 	var sb strings.Builder
 
 	for i, arg := range args {
@@ -92,5 +116,5 @@ func (env *env) evalPrint(args []int) int {
 	fmt.Fprintln(env.out, sb.String())
 
 	// TODO print should not return anything
-	return 0
+	return 0, nil
 }
