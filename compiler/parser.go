@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/srmagura/luma/shared"
@@ -17,7 +18,7 @@ func NewParser(tokens []Token) *Parser {
 
 func Parse(tokens []Token) (shared.Node, error) {
 	p := NewParser(tokens)
-	ast, err := p.parseExpr()
+	ast, err := p.parseModule()
 
 	if err != nil {
 		return nil, err
@@ -44,23 +45,65 @@ func (p *Parser) peek() (Token, bool) {
 	return p.tokens[p.pos], true
 }
 
-func (p *Parser) consumeExpected(expected TokenType) (Token, bool) {
+func (p *Parser) consumeExpected(expected TokenType) (Token, error) {
 	if p.pos >= len(p.tokens) {
-		return Token{}, false
+		if expected != TokenUnknown {
+			return Token{}, &InternalParserError{
+				Message: fmt.Sprintf("Expected token %s but reached end of input", expected),
+				Pos:     p.pos,
+			}
+		}
+
+		return Token{}, nil
 	}
 
 	token := p.tokens[p.pos]
 
 	if expected != TokenUnknown && token.Type != expected {
-		return Token{}, false
+		return Token{}, &InternalParserError{
+			Message: fmt.Sprintf("Expected token %s but got %s", expected, token.Literal),
+			Pos:     p.pos,
+		}
 	}
 
 	p.pos++
-	return token, true
+	return token, nil
 }
 
-func (p *Parser) consume() (Token, bool) {
+func (p *Parser) consume() (Token, error) {
 	return p.consumeExpected(TokenUnknown)
+}
+
+func (p *Parser) parseModule() (shared.Node, error) {
+	var children []shared.Node
+
+	for {
+		// TODO handle multiple statements
+		child, err := p.parseStatement()
+		if err != nil {
+			return nil, err
+		}
+
+		if child == nil {
+			break
+		}
+	}
+
+	return shared.ModuleNode{Children: children}, nil
+}
+
+func (p *Parser) parseStatement() (shared.Node, error) {
+	n, err := p.parseExpr()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consumeExpected(TokenSemi)
+	if err != nil {
+		return p.error("Statements must be terminated by a semicolon")
+	}
+
+	return n, nil
 }
 
 func (p *Parser) parseExpr() (shared.Node, error) {
@@ -80,9 +123,9 @@ func (p *Parser) parseAdditiveExpr() (shared.Node, error) {
 			break
 		}
 
-		opToken, ok := p.consume()
-		if !ok {
-			return nil, nil
+		opToken, err := p.consume()
+		if err != nil {
+			return nil, err
 		}
 
 		var op shared.Op
@@ -117,9 +160,9 @@ func (p *Parser) parseMultiplicativeExpr() (shared.Node, error) {
 			break
 		}
 
-		opToken, ok := p.consume()
-		if !ok {
-			return nil, nil
+		opToken, err := p.consume()
+		if err != nil {
+			return nil, err
 		}
 
 		var op shared.Op
@@ -157,9 +200,9 @@ func (p *Parser) parseCall() (shared.Node, error) {
 			return nil, nil
 		}
 
-		token, ok = p.consumeExpected(TokenLParen)
-		if !ok {
-			return nil, nil
+		token, err = p.consumeExpected(TokenLParen)
+		if err != nil {
+			return nil, err
 		}
 
 		args := []shared.Node{}
@@ -194,9 +237,9 @@ func (p *Parser) parseCall() (shared.Node, error) {
 			}
 		}
 
-		token, ok = p.consumeExpected(TokenRParen)
-		if !ok {
-			return nil, nil
+		token, err = p.consumeExpected(TokenRParen)
+		if err != nil {
+			return nil, err
 		}
 
 		left = shared.CallExpr{
@@ -234,9 +277,9 @@ func (p *Parser) parseIdent() (shared.Node, error) {
 		return nil, nil
 	}
 
-	token, ok = p.consumeExpected(TokenIdent)
-	if !ok {
-		return nil, nil
+	token, err := p.consumeExpected(TokenIdent)
+	if err != nil {
+		return nil, err
 	}
 
 	return shared.IdentNode{Name: token.Literal, Pos: token.Pos}, nil
@@ -248,9 +291,9 @@ func (p *Parser) parseNumber() (shared.Node, error) {
 		return nil, nil
 	}
 
-	token, ok = p.consumeExpected(TokenNumber)
-	if !ok {
-		return nil, nil
+	token, err := p.consumeExpected(TokenNumber)
+	if err != nil {
+		return nil, err
 	}
 
 	n, err := strconv.Atoi(token.Literal)

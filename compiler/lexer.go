@@ -20,6 +20,7 @@ const (
 	TokenRParen
 	TokenIdent
 	TokenComma
+	TokenSemi
 )
 
 func (t TokenType) String() string {
@@ -48,6 +49,8 @@ func (t TokenType) String() string {
 		return "Ident"
 	case TokenComma:
 		return "Comma"
+	case TokenSemi:
+		return "Semi"
 	default:
 		return "Could not convert TokenType to string"
 	}
@@ -102,6 +105,8 @@ func (l *Lexer) Next() Token {
 		return l.advance(TokenRParen)
 	case ch == ',':
 		return l.advance(TokenComma)
+	case ch == ';':
+		return l.advance(TokenSemi)
 	default:
 		return l.advance(TokenUnknown)
 	}

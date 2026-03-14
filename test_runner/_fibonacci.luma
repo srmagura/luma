@@ -1,0 +1,13 @@
+int prevPrev = 0;
+print(prevPrev);
+
+int prev = 1;
+print(prev);
+
+for (int i = 2; i < 10; i++) {
+  int curr = prev + prevPrev;
+  print(curr);
+
+  prevPrev = prev;
+  prev = curr;
+}

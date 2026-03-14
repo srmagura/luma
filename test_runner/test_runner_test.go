@@ -10,6 +10,7 @@ import (
 	"github.com/srmagura/luma/runtime"
 )
 
+// Prefix a test file with _ to make it not run
 func TestAll(t *testing.T) {
 	entries, err := os.ReadDir(".")
 	if err != nil {
@@ -17,7 +18,7 @@ func TestAll(t *testing.T) {
 	}
 
 	for _, entry := range entries {
-		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".luma" {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".luma" && filepath.Base(entry.Name())[0] != '_' {
 			runTest(t, entry.Name())
 		}
 	}

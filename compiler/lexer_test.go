@@ -35,7 +35,7 @@ func TestLexIdent(t *testing.T) {
 }
 
 func TestLexDelimiters(t *testing.T) {
-	src := ",()"
-	expected := []string{",", "(", ")"}
+	src := ";,()"
+	expected := []string{";", ",", "(", ")"}
 	testCore(t, src, expected)
 }
