@@ -7,17 +7,17 @@ import (
 	"github.com/srmagura/luma/shared"
 )
 
-type Parser struct {
-	tokens []Token
+type parser struct {
+	tokens []token
 	pos    int
 }
 
-func NewParser(tokens []Token) *Parser {
-	return &Parser{tokens: tokens, pos: 0}
+func newParser(tokens []token) *parser {
+	return &parser{tokens: tokens, pos: 0}
 }
 
-func Parse(tokens []Token) (shared.Node, error) {
-	p := NewParser(tokens)
+func parse(tokens []token) (shared.Node, error) {
+	p := newParser(tokens)
 	ast, err := p.parseModule()
 
 	if err != nil {
@@ -30,51 +30,51 @@ func Parse(tokens []Token) (shared.Node, error) {
 	return ast, err
 }
 
-func (p *Parser) error(message string) (shared.Node, error) {
+func (p *parser) error(message string) (shared.Node, error) {
 	return nil, &internalCompilerError{
 		message: message,
 		pos:     p.pos,
 	}
 }
 
-func (p *Parser) peek() (Token, bool) {
+func (p *parser) peek() (token, bool) {
 	if p.pos >= len(p.tokens) {
-		return Token{}, false
+		return token{}, false
 	}
 
 	return p.tokens[p.pos], true
 }
 
-func (p *Parser) consumeExpected(expected TokenType) (Token, error) {
+func (p *parser) consumeExpected(expected tokenType) (token, error) {
 	if p.pos >= len(p.tokens) {
-		if expected != TokenUnknown {
-			return Token{}, &internalCompilerError{
+		if expected != tokenUnknown {
+			return token{}, &internalCompilerError{
 				message: fmt.Sprintf("Expected token %s but reached end of input", expected),
 				pos:     p.pos,
 			}
 		}
 
-		return Token{}, nil
+		return token{}, nil
 	}
 
-	token := p.tokens[p.pos]
+	tok := p.tokens[p.pos]
 
-	if expected != TokenUnknown && token.Type != expected {
-		return Token{}, &internalCompilerError{
-			message: fmt.Sprintf("Expected token %s but got %s", expected, token.Literal),
+	if expected != tokenUnknown && tok.Type != expected {
+		return token{}, &internalCompilerError{
+			message: fmt.Sprintf("Expected token %s but got %s", expected, tok.Literal),
 			pos:     p.pos,
 		}
 	}
 
 	p.pos++
-	return token, nil
+	return tok, nil
 }
 
-func (p *Parser) consume() (Token, error) {
-	return p.consumeExpected(TokenUnknown)
+func (p *parser) consume() (token, error) {
+	return p.consumeExpected(tokenUnknown)
 }
 
-func (p *Parser) parseModule() (shared.Node, error) {
+func (p *parser) parseModule() (shared.Node, error) {
 	var children []shared.Node
 
 	for {
@@ -92,13 +92,13 @@ func (p *Parser) parseModule() (shared.Node, error) {
 	return shared.ModuleNode{Children: children}, nil
 }
 
-func (p *Parser) parseStatement() (shared.Node, error) {
+func (p *parser) parseStatement() (shared.Node, error) {
 	n, err := p.parseExpr()
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = p.consumeExpected(TokenSemi)
+	_, err = p.consumeExpected(tokenSemi)
 	if err != nil {
 		return p.error("Statements must be terminated by a semicolon")
 	}
@@ -106,12 +106,12 @@ func (p *Parser) parseStatement() (shared.Node, error) {
 	return n, nil
 }
 
-func (p *Parser) parseExpr() (shared.Node, error) {
+func (p *parser) parseExpr() (shared.Node, error) {
 	return p.parseAdditiveExpr()
 }
 
 // Handle + and -
-func (p *Parser) parseAdditiveExpr() (shared.Node, error) {
+func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 	left, err := p.parseMultiplicativeExpr()
 	if err != nil {
 		return nil, err
@@ -119,20 +119,20 @@ func (p *Parser) parseAdditiveExpr() (shared.Node, error) {
 
 	for {
 		peeked, ok := p.peek()
-		if !ok || (peeked.Type != TokenPlus && peeked.Type != TokenMinus) {
+		if !ok || (peeked.Type != tokenPlus && peeked.Type != tokenMinus) {
 			break
 		}
 
-		opToken, err := p.consume()
+		opTok, err := p.consume()
 		if err != nil {
 			return nil, err
 		}
 
 		var op shared.Op
-		switch opToken.Type {
-		case TokenPlus:
+		switch opTok.Type {
+		case tokenPlus:
 			op = shared.OpAdd
-		case TokenMinus:
+		case tokenMinus:
 			op = shared.OpSubtract
 		}
 
@@ -148,7 +148,7 @@ func (p *Parser) parseAdditiveExpr() (shared.Node, error) {
 }
 
 // Handle *, /, and ~/
-func (p *Parser) parseMultiplicativeExpr() (shared.Node, error) {
+func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 	left, err := p.parseCall()
 	if err != nil {
 		return nil, err
@@ -156,22 +156,22 @@ func (p *Parser) parseMultiplicativeExpr() (shared.Node, error) {
 
 	for {
 		peeked, ok := p.peek()
-		if !ok || (peeked.Type != TokenStar && peeked.Type != TokenFSlash && peeked.Type != TokenTildeFSlash) {
+		if !ok || (peeked.Type != tokenStar && peeked.Type != tokenFSlash && peeked.Type != tokenTildeFSlash) {
 			break
 		}
 
-		opToken, err := p.consume()
+		opTok, err := p.consume()
 		if err != nil {
 			return nil, err
 		}
 
 		var op shared.Op
-		switch opToken.Type {
-		case TokenStar:
+		switch opTok.Type {
+		case tokenStar:
 			op = shared.OpMultiply
-		case TokenFSlash:
+		case tokenFSlash:
 			op = shared.OpDivide
-		case TokenTildeFSlash:
+		case tokenTildeFSlash:
 			op = shared.OpDivideInteger
 		}
 
@@ -186,7 +186,7 @@ func (p *Parser) parseMultiplicativeExpr() (shared.Node, error) {
 	return left, nil
 }
 
-func (p *Parser) parseCall() (shared.Node, error) {
+func (p *parser) parseCall() (shared.Node, error) {
 	left, err := p.parseLeaf()
 	if err != nil {
 		return nil, err
@@ -195,12 +195,12 @@ func (p *Parser) parseCall() (shared.Node, error) {
 	// Does not handle parenthesized functions (yet?)
 	switch v := left.(type) {
 	case shared.IdentNode:
-		token, ok := p.peek()
-		if !ok || token.Type != TokenLParen {
+		tok, ok := p.peek()
+		if !ok || tok.Type != tokenLParen {
 			return nil, nil
 		}
 
-		token, err = p.consumeExpected(TokenLParen)
+		tok, err = p.consumeExpected(tokenLParen)
 		if err != nil {
 			return nil, err
 		}
@@ -209,11 +209,11 @@ func (p *Parser) parseCall() (shared.Node, error) {
 
 		// TODO support more than one arg
 		for {
-			token, ok = p.peek()
+			tok, ok = p.peek()
 			if !ok {
 				return p.error("Reached end while parsing call expression")
 			}
-			if token.Type == TokenRParen {
+			if tok.Type == tokenRParen {
 				break
 			}
 
@@ -224,20 +224,20 @@ func (p *Parser) parseCall() (shared.Node, error) {
 
 			args = append(args, arg)
 
-			token, ok = p.peek()
+			tok, ok = p.peek()
 			if !ok {
 				return p.error("Reached end while parsing call expression")
 			}
-			if token.Type != TokenRParen {
-				if token.Type == TokenComma {
-					p.consumeExpected(TokenComma)
+			if tok.Type != tokenRParen {
+				if tok.Type == tokenComma {
+					p.consumeExpected(tokenComma)
 				} else {
 					return p.error("Arguments were not separated by a comma in a call expression")
 				}
 			}
 		}
 
-		token, err = p.consumeExpected(TokenRParen)
+		tok, err = p.consumeExpected(tokenRParen)
 		if err != nil {
 			return nil, err
 		}
@@ -251,7 +251,7 @@ func (p *Parser) parseCall() (shared.Node, error) {
 	return left, nil
 }
 
-func (p *Parser) parseLeaf() (shared.Node, error) {
+func (p *parser) parseLeaf() (shared.Node, error) {
 	node, err := p.parseIdent()
 	if err != nil {
 		return nil, err
@@ -271,35 +271,35 @@ func (p *Parser) parseLeaf() (shared.Node, error) {
 	return nil, nil
 }
 
-func (p *Parser) parseIdent() (shared.Node, error) {
-	token, ok := p.peek()
-	if !ok || token.Type != TokenIdent {
+func (p *parser) parseIdent() (shared.Node, error) {
+	tok, ok := p.peek()
+	if !ok || tok.Type != tokenIdent {
 		return nil, nil
 	}
 
-	token, err := p.consumeExpected(TokenIdent)
+	tok, err := p.consumeExpected(tokenIdent)
 	if err != nil {
 		return nil, err
 	}
 
-	return shared.IdentNode{Name: token.Literal, Pos: token.Pos}, nil
+	return shared.IdentNode{Name: tok.Literal, Pos: tok.Pos}, nil
 }
 
-func (p *Parser) parseNumber() (shared.Node, error) {
-	token, ok := p.peek()
-	if !ok || token.Type != TokenNumber {
+func (p *parser) parseNumber() (shared.Node, error) {
+	tok, ok := p.peek()
+	if !ok || tok.Type != tokenNumber {
 		return nil, nil
 	}
 
-	token, err := p.consumeExpected(TokenNumber)
+	tok, err := p.consumeExpected(tokenNumber)
 	if err != nil {
 		return nil, err
 	}
 
-	n, err := strconv.Atoi(token.Literal)
+	n, err := strconv.Atoi(tok.Literal)
 	if err != nil {
 		return p.error("Failed to parse int")
 	}
 
-	return shared.IntLiteral{Value: n, Pos: token.Pos}, nil
+	return shared.IntLiteral{Value: n, Pos: tok.Pos}, nil
 }

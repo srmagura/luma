@@ -14,7 +14,7 @@ func Compile(src string) (shared.Node, error) {
 	tokens := Lex(src)
 
 	for _, token := range tokens {
-		if token.Type == TokenUnknown {
+		if token.Type == tokenUnknown {
 			line, col := GetLineColFromPosition(src, token.Pos)
 
 			return nil, &CompilerError{
@@ -25,7 +25,7 @@ func Compile(src string) (shared.Node, error) {
 		}
 	}
 
-	ast, err := Parse(tokens)
+	ast, err := parse(tokens)
 
 	if err != nil {
 		internalParserErr, ok := errors.AsType[*internalCompilerError](err)

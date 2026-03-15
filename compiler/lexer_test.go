@@ -8,7 +8,7 @@ func testCore(t *testing.T, src string, expected []string) {
 	actual := Lex(src)
 
 	for i := range expected {
-		if actual[i].Type == TokenUnknown {
+		if actual[i].Type == tokenUnknown {
 			t.Fatalf("Unknown token: %s", actual[i].Literal)
 		}
 

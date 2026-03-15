@@ -5,81 +5,81 @@ import (
 	"unicode"
 )
 
-type TokenType byte
+type tokenType byte
 
 const (
-	TokenUnknown TokenType = iota
-	TokenEOF
-	TokenNumber
-	TokenPlus
-	TokenMinus
-	TokenStar
-	TokenFSlash
-	TokenTildeFSlash
-	TokenLParen
-	TokenRParen
-	TokenIdent
-	TokenComma
-	TokenSemi
+	tokenUnknown tokenType = iota
+	tokenEOF
+	tokenNumber
+	tokenPlus
+	tokenMinus
+	tokenStar
+	tokenFSlash
+	tokenTildeFSlash
+	tokenLParen
+	tokenRParen
+	tokenIdent
+	tokenComma
+	tokenSemi
 )
 
-func (t TokenType) String() string {
+func (t tokenType) String() string {
 	switch t {
-	case TokenUnknown:
+	case tokenUnknown:
 		return "Unknown"
-	case TokenEOF:
+	case tokenEOF:
 		return "EOF"
-	case TokenNumber:
+	case tokenNumber:
 		return "Number"
-	case TokenPlus:
+	case tokenPlus:
 		return "Plus"
-	case TokenMinus:
+	case tokenMinus:
 		return "Minus"
-	case TokenStar:
+	case tokenStar:
 		return "Star"
-	case TokenFSlash:
+	case tokenFSlash:
 		return "FSlash"
-	case TokenTildeFSlash:
+	case tokenTildeFSlash:
 		return "TildeFSlash"
-	case TokenLParen:
+	case tokenLParen:
 		return "LParen"
-	case TokenRParen:
+	case tokenRParen:
 		return "RParen"
-	case TokenIdent:
+	case tokenIdent:
 		return "Ident"
-	case TokenComma:
+	case tokenComma:
 		return "Comma"
-	case TokenSemi:
+	case tokenSemi:
 		return "Semi"
 	default:
-		return "Could not convert TokenType to string"
+		return "Could not convert tokenType to string"
 	}
 }
 
-type Token struct {
-	Type    TokenType
+type token struct {
+	Type    tokenType
 	Literal string
 	Pos     int
 }
 
-func (t Token) String() string {
-	return fmt.Sprintf("Token{%s, %q}", t.Type, t.Literal)
+func (t token) String() string {
+	return fmt.Sprintf("token{%s, %q}", t.Type, t.Literal)
 }
 
-type Lexer struct {
+type lexer struct {
 	src []rune
 	pos int
 }
 
-func NewLexer(src string) *Lexer {
-	return &Lexer{src: []rune(src)}
+func newLexer(src string) *lexer {
+	return &lexer{src: []rune(src)}
 }
 
-func (l *Lexer) Next() Token {
+func (l *lexer) next() token {
 	l.skipWhitespace()
 
 	if l.pos >= len(l.src) {
-		return l.make(TokenEOF, "")
+		return l.make(tokenEOF, "")
 	}
 
 	ch := l.src[l.pos]
@@ -90,35 +90,35 @@ func (l *Lexer) Next() Token {
 	case unicode.IsDigit(ch):
 		return l.readNumber()
 	case ch == '+':
-		return l.advance(TokenPlus)
+		return l.advance(tokenPlus)
 	case ch == '-':
-		return l.advance(TokenMinus)
+		return l.advance(tokenMinus)
 	case ch == '*':
-		return l.advance(TokenStar)
+		return l.advance(tokenStar)
 	case ch == '/':
-		return l.advance(TokenFSlash)
+		return l.advance(tokenFSlash)
 	case ch == '~':
 		return l.readTildeFSlash()
 	case ch == '(':
-		return l.advance(TokenLParen)
+		return l.advance(tokenLParen)
 	case ch == ')':
-		return l.advance(TokenRParen)
+		return l.advance(tokenRParen)
 	case ch == ',':
-		return l.advance(TokenComma)
+		return l.advance(tokenComma)
 	case ch == ';':
-		return l.advance(TokenSemi)
+		return l.advance(tokenSemi)
 	default:
-		return l.advance(TokenUnknown)
+		return l.advance(tokenUnknown)
 	}
 }
 
-func Lex(src string) []Token {
-	var tokens []Token
-	lexer := NewLexer(src)
+func Lex(src string) []token {
+	var tokens []token
+	lexer := newLexer(src)
 
 	for {
-		token := lexer.Next()
-		if token.Type == TokenEOF {
+		token := lexer.next()
+		if token.Type == tokenEOF {
 			break
 		}
 
@@ -128,35 +128,35 @@ func Lex(src string) []Token {
 	return tokens
 }
 
-func (l *Lexer) skipWhitespace() {
+func (l *lexer) skipWhitespace() {
 	for l.pos < len(l.src) && unicode.IsSpace(l.src[l.pos]) {
 		l.pos++
 	}
 }
 
 // advance consumes one rune and returns a token for it.
-func (l *Lexer) advance(typ TokenType) Token {
+func (l *lexer) advance(typ tokenType) token {
 	tok := l.make(typ, string(l.src[l.pos]))
 	l.pos++
 	return tok
 }
 
-func (l *Lexer) make(typ TokenType, lit string) Token {
-	return Token{Type: typ, Literal: lit, Pos: l.pos}
+func (l *lexer) make(typ tokenType, lit string) token {
+	return token{Type: typ, Literal: lit, Pos: l.pos}
 }
 
-func (l *Lexer) makeRange(typ TokenType, start int) Token {
-	return Token{Type: typ, Literal: string(l.src[start:l.pos]), Pos: start}
+func (l *lexer) makeRange(typ tokenType, start int) token {
+	return token{Type: typ, Literal: string(l.src[start:l.pos]), Pos: start}
 }
 
-func (l *Lexer) readIdent() Token {
+func (l *lexer) readIdent() token {
 	start := l.pos
 
 	// First character must be letter or underscore
 	if unicode.IsLetter(l.src[l.pos]) || l.src[l.pos] == '_' {
 		l.pos++
 	} else {
-		return Token{}
+		return token{}
 	}
 
 	// Additional characters can be letter, underscore, or number
@@ -164,10 +164,10 @@ func (l *Lexer) readIdent() Token {
 		l.pos++
 	}
 
-	return l.makeRange(TokenIdent, start)
+	return l.makeRange(tokenIdent, start)
 }
 
-func (l *Lexer) readNumber() Token {
+func (l *lexer) readNumber() token {
 	start := l.pos
 
 	for l.pos < len(l.src) && unicode.IsDigit(l.src[l.pos]) {
@@ -175,7 +175,7 @@ func (l *Lexer) readNumber() Token {
 	}
 
 	if l.pos == start {
-		return Token{}
+		return token{}
 	}
 
 	// Optional decimal part
@@ -186,16 +186,16 @@ func (l *Lexer) readNumber() Token {
 		}
 	}
 
-	return l.makeRange(TokenNumber, start)
+	return l.makeRange(tokenNumber, start)
 }
 
-func (l *Lexer) readTildeFSlash() Token {
+func (l *lexer) readTildeFSlash() token {
 	start := l.pos
 
 	if l.pos+1 < len(l.src) && l.src[l.pos] == '~' && l.src[l.pos+1] == '/' {
 		l.pos += 2
-		return l.makeRange(TokenTildeFSlash, start)
+		return l.makeRange(tokenTildeFSlash, start)
 	}
 
-	return Token{}
+	return token{}
 }

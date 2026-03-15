@@ -13,7 +13,7 @@ func compileExpr(src string) (Node, error) {
 	tokens := Lex(src)
 
 	for _, token := range tokens {
-		if token.Type == TokenUnknown {
+		if token.Type == tokenUnknown {
 			return nil, &internalCompilerError{
 				message: fmt.Sprintf("Unknown token: %s", token.Literal),
 				pos:     token.Pos,
@@ -21,7 +21,7 @@ func compileExpr(src string) (Node, error) {
 		}
 	}
 
-	parser := NewParser(tokens)
+	parser := newParser(tokens)
 	return parser.parseExpr()
 
 }
@@ -70,7 +70,7 @@ func testSuccessfulExprCompilation(t *testing.T, src string, expected shared.Nod
 	compareASTs(t, expected, actual)
 }
 
-func TestInvalidToken(t *testing.T) {
+func TestInvalidtoken(t *testing.T) {
 	src := "1@"
 	expectedMessage := "Unknown token: @"
 	testFailedExprCompilation(t, src, expectedMessage, 0)
