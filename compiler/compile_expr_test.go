@@ -2,26 +2,43 @@ package compiler
 
 import (
 	"errors"
-	"strings"
+	"fmt"
 	"testing"
 
 	"github.com/srmagura/luma/shared"
 )
 
-type (
-	Node       = shared.Node
-	IntLiteral = shared.IntLiteral
-	IdentNode  = shared.IdentNode
-	BinaryExpr = shared.BinaryExpr
-	CallExpr   = shared.CallExpr
-)
+func compileExpr(src string) (Node, error) {
+	src = NormalizeSource(src)
+	tokens := Lex(src)
 
-func testFailedCompilation(t *testing.T, src string, expectedMessage string, expectedLine int) {
-	_, err := Compile(src)
+	for _, token := range tokens {
+		if token.Type == TokenUnknown {
+			return nil, &InternalParserError{
+				Message: fmt.Sprintf("Unknown token: %s", token.Literal),
+				Pos:     token.Pos,
+			}
+		}
+	}
 
-	parserErr, ok := errors.AsType[*ParserError](err)
+	parser := NewParser(tokens)
+	return parser.parseExpr()
+
+}
+
+func testFailedExprCompilation(t *testing.T, src string, expectedMessage string, expectedLine int) {
+	_, err := compileExpr(src)
+
+	internalParserErr, ok := errors.AsType[*InternalParserError](err)
 	if !ok {
-		t.Fatalf("Could not cast error to ParserError")
+		t.Fatalf("Could not cast error to InternalParserError: %s", err.Error())
+	}
+
+	line, col := GetLineColFromPosition(src, internalParserErr.Pos)
+	parserErr := ParserError{
+		Message: internalParserErr.Message,
+		Line:    line,
+		Col:     col,
 	}
 
 	if parserErr.Message != expectedMessage {
@@ -35,31 +52,19 @@ func testFailedCompilation(t *testing.T, src string, expectedMessage string, exp
 	// Not bothering to test Col
 }
 
-func compareASTs(t *testing.T, expected shared.Node, actual shared.Node) {
-	expectedString := shared.StringifyAST(expected)
-	actualString := shared.StringifyAST(actual)
+// func testSuccessfulExprCompilation(t *testing.T, src string, expected shared.Node) {
+// 	actual, err := Compile(src)
+// 	if err != nil {
+// 		t.Fatalf("Compilation failed\n%s", err.Error())
+// 	}
 
-	t.Logf("EXPECTED:\n%s\n", expectedString)
-	t.Logf("ACTUAL:\n%s\n", actualString)
+// 	compareASTs(t, expected, actual)
+// }
 
-	expectedLines := strings.Split(expectedString, "\n")
-	actualLines := strings.Split(actualString, "\n")
-
-	for i := 0; i < min(len(expectedLines), len(actualLines)); i++ {
-		if expectedLines[i] != actualLines[i] {
-			t.Fatalf("Difference at line %d\n", i+1)
-		}
-	}
-
-	if len(expectedLines) != len(actualLines) {
-		t.Fatalf("Expected had %d lines while actual had %d lines\n", len(expectedLines), len(actualLines))
-	}
-}
-
-func testSuccessfulCompilation(t *testing.T, src string, expected shared.Node) {
-	actual, err := Compile(src)
+func testSuccessfulExprCompilation(t *testing.T, src string, expected shared.Node) {
+	actual, err := compileExpr(src)
 	if err != nil {
-		t.Fatalf("Compilation failed\n%s", err.Error())
+		t.Fatal(err.Error())
 	}
 
 	compareASTs(t, expected, actual)
@@ -68,13 +73,13 @@ func testSuccessfulCompilation(t *testing.T, src string, expected shared.Node) {
 func TestInvalidToken(t *testing.T) {
 	src := "1@"
 	expectedMessage := "Unknown token: @"
-	testFailedCompilation(t, src, expectedMessage, 0)
+	testFailedExprCompilation(t, src, expectedMessage, 0)
 }
 
 func TestIntLiteral(t *testing.T) {
 	src := "2"
 	expected := IntLiteral{Value: 2}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulExprCompilation(t, src, expected)
 }
 
 func TestAddition(t *testing.T) {
@@ -88,7 +93,7 @@ func TestAddition(t *testing.T) {
 		},
 		Right: IntLiteral{Value: 4},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulExprCompilation(t, src, expected)
 }
 
 func TestMultiplication(t *testing.T) {
@@ -106,7 +111,7 @@ func TestMultiplication(t *testing.T) {
 		},
 		Right: IntLiteral{Value: 7},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulExprCompilation(t, src, expected)
 }
 
 func TestCall1(t *testing.T) {
@@ -115,7 +120,7 @@ func TestCall1(t *testing.T) {
 		Func: IdentNode{Name: "print"},
 		Args: []Node{},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulExprCompilation(t, src, expected)
 }
 
 func TestCall2(t *testing.T) {
@@ -130,7 +135,7 @@ func TestCall2(t *testing.T) {
 			},
 		},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulExprCompilation(t, src, expected)
 }
 
 func TestCall3(t *testing.T) {
@@ -147,11 +152,11 @@ func TestCall3(t *testing.T) {
 			IntLiteral{Value: 5},
 		},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulExprCompilation(t, src, expected)
 }
 
 func TestCall4(t *testing.T) {
 	src := "print(2 4)"
 	expectedMessage := "Arguments were not separated by a comma in a call expression"
-	testFailedCompilation(t, src, expectedMessage, 0)
+	testFailedExprCompilation(t, src, expectedMessage, 0)
 }
