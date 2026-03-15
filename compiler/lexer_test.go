@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func testCore(t *testing.T, src string, expected []string) {
+func testSuccessfulLex(t *testing.T, src string, expected []string, expectedTypes []tokenType) {
 	actual := lex(src)
 
 	for i := range expected {
@@ -12,8 +12,8 @@ func testCore(t *testing.T, src string, expected []string) {
 			t.Fatalf("Unknown token: %s", actual[i].literal)
 		}
 
-		if actual[i].literal != expected[i] {
-			t.Fatalf("Expected: %s    Actual: %s", expected[i], actual[i].literal)
+		if actual[i].literal != expected[i] || actual[i]._type != expectedTypes[i] {
+			t.Fatalf("Expected: %s (%s)    Actual: %s (%s)", expected[i], expectedTypes[i], actual[i].literal, actual[i]._type)
 		}
 	}
 
@@ -23,19 +23,29 @@ func testCore(t *testing.T, src string, expected []string) {
 }
 
 func TestLexOperators(t *testing.T) {
-	src := "+-*/~/"
-	expected := []string{"+", "-", "*", "/", "~/"}
-	testCore(t, src, expected)
+	src := "+-*/~/="
+	expected := []string{"+", "-", "*", "/", "~/", "="}
+	expectedTypes := []tokenType{tokenPlus, tokenMinus, tokenStar, tokenFSlash, tokenTildeFSlash, tokenEqual}
+	testSuccessfulLex(t, src, expected, expectedTypes)
 }
 
 func TestLexIdent(t *testing.T) {
 	src := "1_test2+abC a_b"
 	expected := []string{"1", "_test2", "+", "abC", "a_b"}
-	testCore(t, src, expected)
+	expectedTypes := []tokenType{tokenNumber, tokenIdent, tokenPlus, tokenIdent, tokenIdent}
+	testSuccessfulLex(t, src, expected, expectedTypes)
+}
+
+func TestKeyword(t *testing.T) {
+	src := "int for"
+	expected := []string{"int", "for"}
+	expectedTypes := []tokenType{tokenInt, tokenFor}
+	testSuccessfulLex(t, src, expected, expectedTypes)
 }
 
 func TestLexDelimiters(t *testing.T) {
 	src := ";,()"
 	expected := []string{";", ",", "(", ")"}
-	testCore(t, src, expected)
+	expectedTypes := []tokenType{tokenSemi, tokenComma, tokenLParen, tokenRParen}
+	testSuccessfulLex(t, src, expected, expectedTypes)
 }

@@ -21,6 +21,9 @@ const (
 	tokenIdent
 	tokenComma
 	tokenSemi
+	tokenEqual
+	tokenInt
+	tokenFor
 )
 
 func (t tokenType) String() string {
@@ -51,6 +54,12 @@ func (t tokenType) String() string {
 		return "Comma"
 	case tokenSemi:
 		return "Semi"
+	case tokenEqual:
+		return "Equal"
+	case tokenInt:
+		return "Int"
+	case tokenFor:
+		return "For"
 	default:
 		return "Could not convert tokenType to string"
 	}
@@ -86,7 +95,7 @@ func (l *lexer) next() token {
 
 	switch {
 	case unicode.IsLetter(ch) || ch == '_':
-		return l.readIdent()
+		return l.readIdentOrKeyword()
 	case unicode.IsDigit(ch):
 		return l.readNumber()
 	case ch == '+':
@@ -107,6 +116,8 @@ func (l *lexer) next() token {
 		return l.advance(tokenComma)
 	case ch == ';':
 		return l.advance(tokenSemi)
+	case ch == '=':
+		return l.advance(tokenEqual)
 	default:
 		return l.advance(tokenUnknown)
 	}
@@ -147,6 +158,22 @@ func (l *lexer) make(typ tokenType, lit string) token {
 
 func (l *lexer) makeRange(typ tokenType, start int) token {
 	return token{_type: typ, literal: string(l.src[start:l.pos]), pos: start}
+}
+
+var keywords = map[string]tokenType{
+	"int": tokenInt,
+	"for": tokenFor,
+}
+
+func (l *lexer) readIdentOrKeyword() token {
+	tok := l.readIdent()
+
+	keywordTokenType, ok := keywords[tok.literal]
+	if ok {
+		tok._type = keywordTokenType
+	}
+
+	return tok
 }
 
 func (l *lexer) readIdent() token {
