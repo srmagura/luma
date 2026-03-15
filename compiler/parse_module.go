@@ -23,7 +23,7 @@ func (p *parser) parseModule() (shared.Node, error) {
 		children = append(children, child)
 	}
 
-	return shared.ModuleNode{Children: children}, nil
+	return shared.ModuleNode{Children: children, Pos: 0}, nil
 }
 
 func (p *parser) parseStatement() (shared.Node, error) {
@@ -79,7 +79,7 @@ func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		left = shared.BinaryExpr{Op: op, Left: left, Right: right}
+		left = shared.BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
 	}
 
 	return left, nil
@@ -118,7 +118,7 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		left = shared.BinaryExpr{Op: op, Left: left, Right: right}
+		left = shared.BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
 	}
 
 	return left, nil
@@ -183,6 +183,7 @@ func (p *parser) parseCall() (shared.Node, error) {
 		left = shared.CallExpr{
 			Func: v,
 			Args: args,
+			Pos:  v.Pos,
 		}
 	}
 

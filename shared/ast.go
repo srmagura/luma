@@ -34,6 +34,7 @@ func (op Op) String() string {
 
 type Node interface {
 	nodeTag()
+	//GetPos() int
 }
 
 // --- Leaf nodes ---
@@ -54,24 +55,37 @@ type BinaryExpr struct {
 	Op    Op
 	Left  Node
 	Right Node
+	Pos   int
 }
 
 type CallExpr struct {
 	Func Node
 	Args []Node
+	Pos  int
 }
 
 type ModuleNode struct {
 	Children []Node
+	Pos      int
 }
 
 // --- Implement the sealed interface ---
 
 func (IntLiteral) nodeTag() {}
-func (IdentNode) nodeTag()  {}
+
+// func (n IntLiteral) GetPos() int { return n.Pos }
+func (IdentNode) nodeTag() {}
+
+// func (n IdentNode) GetPos() int  { return n.Pos }
 func (BinaryExpr) nodeTag() {}
-func (CallExpr) nodeTag()   {}
+
+// func (n BinaryExpr) GetPos() int { return n.Pos }
+func (CallExpr) nodeTag() {}
+
+// func (n CallExpr) GetPos() int   { return n.Pos }
 func (ModuleNode) nodeTag() {}
+
+//func (n ModuleNode) GetPos() int { return n.Pos }
 
 // --- Pretty printer: indented tree view ---
 

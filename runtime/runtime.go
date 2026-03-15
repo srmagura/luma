@@ -35,7 +35,7 @@ func (env *env) evalNode(n shared.Node) (int, error) {
 	default:
 		return 0, &internalRuntimeError{
 			message: fmt.Sprintf("evalNode: Unexpected node type: %s", n),
-			pos:     0, // TODO
+			pos:     0, // OK to set position to 0 since this error indicates a bug in luma
 		}
 	}
 }
@@ -77,7 +77,7 @@ func (env *env) evalCallExpr(n shared.CallExpr) (int, error) {
 	default:
 		return 0, &internalRuntimeError{
 			message: "Only identifiers are valid as a function",
-			pos:     0, // TODO
+			pos:     n.Pos,
 		}
 	}
 }
@@ -108,7 +108,7 @@ func (env *env) evalBinaryExpr(n shared.BinaryExpr) (int, error) {
 	default:
 		return 0, &internalRuntimeError{
 			message: fmt.Sprintf("Unexpected binary operator: %s", n.Op),
-			pos:     0, // TODO
+			pos:     n.Pos,
 		}
 	}
 }
