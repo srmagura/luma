@@ -2,6 +2,8 @@ package compiler
 
 import (
 	"testing"
+
+	"github.com/srmagura/luma/shared"
 )
 
 func testSuccessfulCompilation(t *testing.T, src string, expected Node) {
@@ -13,13 +15,26 @@ func testSuccessfulCompilation(t *testing.T, src string, expected Node) {
 	compareASTs(t, expected, actual)
 }
 
-func TestCallStatement(t *testing.T) {
-	src := "print(11);"
+func TestEmptyModule(t *testing.T) {
+	src := ""
+	expected := ModuleNode{
+		Children: []Node{},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}
+
+func TestExprStatements(t *testing.T) {
+	src := "print(11);\n1*2;"
 	expected := ModuleNode{
 		Children: []Node{
 			CallExpr{
 				Func: IdentNode{Name: "print"},
 				Args: []Node{IntLiteral{Value: 11}},
+			},
+			BinaryExpr{
+				Op:    shared.OpMultiply,
+				Left:  IntLiteral{Value: 1},
+				Right: IntLiteral{Value: 2},
 			},
 		},
 	}
