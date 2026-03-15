@@ -31,9 +31,9 @@ func Parse(tokens []Token) (shared.Node, error) {
 }
 
 func (p *Parser) error(message string) (shared.Node, error) {
-	return nil, &InternalParserError{
-		Message: message,
-		Pos:     p.pos,
+	return nil, &internalCompilerError{
+		message: message,
+		pos:     p.pos,
 	}
 }
 
@@ -48,9 +48,9 @@ func (p *Parser) peek() (Token, bool) {
 func (p *Parser) consumeExpected(expected TokenType) (Token, error) {
 	if p.pos >= len(p.tokens) {
 		if expected != TokenUnknown {
-			return Token{}, &InternalParserError{
-				Message: fmt.Sprintf("Expected token %s but reached end of input", expected),
-				Pos:     p.pos,
+			return Token{}, &internalCompilerError{
+				message: fmt.Sprintf("Expected token %s but reached end of input", expected),
+				pos:     p.pos,
 			}
 		}
 
@@ -60,9 +60,9 @@ func (p *Parser) consumeExpected(expected TokenType) (Token, error) {
 	token := p.tokens[p.pos]
 
 	if expected != TokenUnknown && token.Type != expected {
-		return Token{}, &InternalParserError{
-			Message: fmt.Sprintf("Expected token %s but got %s", expected, token.Literal),
-			Pos:     p.pos,
+		return Token{}, &internalCompilerError{
+			message: fmt.Sprintf("Expected token %s but got %s", expected, token.Literal),
+			pos:     p.pos,
 		}
 	}
 

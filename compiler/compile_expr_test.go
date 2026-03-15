@@ -14,9 +14,9 @@ func compileExpr(src string) (Node, error) {
 
 	for _, token := range tokens {
 		if token.Type == TokenUnknown {
-			return nil, &InternalParserError{
-				Message: fmt.Sprintf("Unknown token: %s", token.Literal),
-				Pos:     token.Pos,
+			return nil, &internalCompilerError{
+				message: fmt.Sprintf("Unknown token: %s", token.Literal),
+				pos:     token.Pos,
 			}
 		}
 	}
@@ -29,14 +29,14 @@ func compileExpr(src string) (Node, error) {
 func testFailedExprCompilation(t *testing.T, src string, expectedMessage string, expectedLine int) {
 	_, err := compileExpr(src)
 
-	internalParserErr, ok := errors.AsType[*InternalParserError](err)
+	internalParserErr, ok := errors.AsType[*internalCompilerError](err)
 	if !ok {
 		t.Fatalf("Could not cast error to InternalParserError: %s", err.Error())
 	}
 
-	line, col := GetLineColFromPosition(src, internalParserErr.Pos)
-	parserErr := ParserError{
-		Message: internalParserErr.Message,
+	line, col := GetLineColFromPosition(src, internalParserErr.pos)
+	parserErr := CompilerError{
+		Message: internalParserErr.message,
 		Line:    line,
 		Col:     col,
 	}

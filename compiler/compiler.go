@@ -17,7 +17,7 @@ func Compile(src string) (shared.Node, error) {
 		if token.Type == TokenUnknown {
 			line, col := GetLineColFromPosition(src, token.Pos)
 
-			return nil, &ParserError{
+			return nil, &CompilerError{
 				Message: fmt.Sprintf("Unknown token: %s", token.Literal),
 				Line:    line,
 				Col:     col,
@@ -28,15 +28,15 @@ func Compile(src string) (shared.Node, error) {
 	ast, err := Parse(tokens)
 
 	if err != nil {
-		internalParserErr, ok := errors.AsType[*InternalParserError](err)
+		internalParserErr, ok := errors.AsType[*internalCompilerError](err)
 		if !ok {
 			log.Fatalln("Could not cast error to ParserError")
 		}
 
-		line, col := GetLineColFromPosition(src, internalParserErr.Pos)
+		line, col := GetLineColFromPosition(src, internalParserErr.pos)
 
-		return nil, &ParserError{
-			Message: internalParserErr.Message,
+		return nil, &CompilerError{
+			Message: internalParserErr.message,
 			Line:    line,
 			Col:     col,
 		}
