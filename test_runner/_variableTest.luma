@@ -1,2 +1,2 @@
-int prevPrev = 0;
+var prevPrev = 0;
 print(prevPrev);

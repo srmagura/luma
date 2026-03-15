@@ -23,7 +23,7 @@ func TestEmptyModule(t *testing.T) {
 	testSuccessfulCompilation(t, src, expected)
 }
 
-func TestExprStatements(t *testing.T) {
+func TestExprStatement(t *testing.T) {
 	src := "print(11);\n1*2;"
 	expected := ModuleNode{
 		Children: []Node{
@@ -35,6 +35,23 @@ func TestExprStatements(t *testing.T) {
 				Op:    shared.OpMultiply,
 				Left:  IntLiteral{Value: 1},
 				Right: IntLiteral{Value: 2},
+			},
+		},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}
+
+func TestAssignmentStatement(t *testing.T) {
+	src := "var x = 7 + 8;"
+	expected := ModuleNode{
+		Children: []Node{
+			AssignmentStatement{
+				Name: "x",
+				Value: BinaryExpr{
+					Op:    shared.OpAdd,
+					Left:  IntLiteral{Value: 7},
+					Right: IntLiteral{Value: 8},
+				},
 			},
 		},
 	}

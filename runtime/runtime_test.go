@@ -8,7 +8,7 @@ import (
 )
 
 func TestWriteToStringBuilder(t *testing.T) {
-	src := "print(2 - 3 + 4)"
+	src := "print(2 - 3 + 4);"
 	expected := "3\n"
 
 	ast, err := compiler.Compile(src)

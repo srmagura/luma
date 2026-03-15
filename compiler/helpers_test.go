@@ -8,12 +8,13 @@ import (
 )
 
 type (
-	Node       = shared.Node
-	IntLiteral = shared.IntLiteral
-	IdentNode  = shared.IdentNode
-	BinaryExpr = shared.BinaryExpr
-	CallExpr   = shared.CallExpr
-	ModuleNode = shared.ModuleNode
+	Node                = shared.Node
+	IntLiteral          = shared.IntLiteral
+	IdentNode           = shared.IdentNode
+	BinaryExpr          = shared.BinaryExpr
+	CallExpr            = shared.CallExpr
+	AssignmentStatement = shared.AssignmentStatement
+	ModuleNode          = shared.ModuleNode
 )
 
 func compareASTs(t *testing.T, expected Node, actual Node) {

@@ -64,6 +64,13 @@ type CallExpr struct {
 	Pos  int
 }
 
+type AssignmentStatement struct {
+	// TODO declared type
+	Name  string
+	Value Node
+	Pos   int
+}
+
 type ModuleNode struct {
 	Children []Node
 	Pos      int
@@ -80,7 +87,8 @@ func (IdentNode) nodeTag() {}
 func (BinaryExpr) nodeTag() {}
 
 // func (n BinaryExpr) GetPos() int { return n.Pos }
-func (CallExpr) nodeTag() {}
+func (CallExpr) nodeTag()            {}
+func (AssignmentStatement) nodeTag() {}
 
 // func (n CallExpr) GetPos() int   { return n.Pos }
 func (ModuleNode) nodeTag() {}
@@ -133,6 +141,10 @@ func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLa
 		for i, arg := range v.Args {
 			stringifyNode(sb, arg, childPrefix, false, i == len(v.Args)-1)
 		}
+
+	case AssignmentStatement:
+		fmt.Fprintf(sb, "%s%sAssignmentStatement(%s)\n", prefix, connector, v.Name)
+		stringifyNode(sb, v.Value, childPrefix, false, true)
 
 	case ModuleNode:
 		fmt.Fprintf(sb, "%s%sModule\n", prefix, connector)

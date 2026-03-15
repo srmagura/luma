@@ -22,7 +22,7 @@ const (
 	tokenComma
 	tokenSemi
 	tokenEqual
-	tokenInt
+	tokenVar
 	tokenFor
 )
 
@@ -56,7 +56,7 @@ func (t tokenType) String() string {
 		return "Semi"
 	case tokenEqual:
 		return "Equal"
-	case tokenInt:
+	case tokenVar:
 		return "Int"
 	case tokenFor:
 		return "For"
@@ -161,7 +161,7 @@ func (l *lexer) makeRange(typ tokenType, start int) token {
 }
 
 var keywords = map[string]tokenType{
-	"int": tokenInt,
+	"var": tokenVar,
 	"for": tokenFor,
 }
 

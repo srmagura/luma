@@ -37,9 +37,9 @@ func TestLexIdent(t *testing.T) {
 }
 
 func TestKeyword(t *testing.T) {
-	src := "int for"
-	expected := []string{"int", "for"}
-	expectedTypes := []tokenType{tokenInt, tokenFor}
+	src := "var for"
+	expected := []string{"var", "for"}
+	expectedTypes := []tokenType{tokenVar, tokenFor}
 	testSuccessfulLex(t, src, expected, expectedTypes)
 }
 
