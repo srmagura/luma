@@ -9,14 +9,14 @@ import (
 )
 
 func compileExpr(src string) (Node, error) {
-	src = NormalizeSource(src)
-	tokens := Lex(src)
+	src = normalizeSource(src)
+	tokens := lex(src)
 
 	for _, token := range tokens {
-		if token.Type == tokenUnknown {
+		if token._type == tokenUnknown {
 			return nil, &internalCompilerError{
-				message: fmt.Sprintf("Unknown token: %s", token.Literal),
-				pos:     token.Pos,
+				message: fmt.Sprintf("Unknown token: %s", token.literal),
+				pos:     token.pos,
 			}
 		}
 	}
@@ -34,7 +34,7 @@ func testFailedExprCompilation(t *testing.T, src string, expectedMessage string,
 		t.Fatalf("Could not cast error to InternalParserError: %s", err.Error())
 	}
 
-	line, col := GetLineColFromPosition(src, internalParserErr.pos)
+	line, col := getLineColFromPosition(src, internalParserErr.pos)
 	parserErr := CompilerError{
 		Message: internalParserErr.message,
 		Line:    line,

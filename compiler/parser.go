@@ -59,9 +59,9 @@ func (p *parser) consumeExpected(expected tokenType) (token, error) {
 
 	tok := p.tokens[p.pos]
 
-	if expected != tokenUnknown && tok.Type != expected {
+	if expected != tokenUnknown && tok._type != expected {
 		return token{}, &internalCompilerError{
-			message: fmt.Sprintf("Expected token %s but got %s", expected, tok.Literal),
+			message: fmt.Sprintf("Expected token %s but got %s", expected, tok.literal),
 			pos:     p.pos,
 		}
 	}
@@ -119,7 +119,7 @@ func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 
 	for {
 		peeked, ok := p.peek()
-		if !ok || (peeked.Type != tokenPlus && peeked.Type != tokenMinus) {
+		if !ok || (peeked._type != tokenPlus && peeked._type != tokenMinus) {
 			break
 		}
 
@@ -129,7 +129,7 @@ func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 		}
 
 		var op shared.Op
-		switch opTok.Type {
+		switch opTok._type {
 		case tokenPlus:
 			op = shared.OpAdd
 		case tokenMinus:
@@ -156,7 +156,7 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 
 	for {
 		peeked, ok := p.peek()
-		if !ok || (peeked.Type != tokenStar && peeked.Type != tokenFSlash && peeked.Type != tokenTildeFSlash) {
+		if !ok || (peeked._type != tokenStar && peeked._type != tokenFSlash && peeked._type != tokenTildeFSlash) {
 			break
 		}
 
@@ -166,7 +166,7 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 		}
 
 		var op shared.Op
-		switch opTok.Type {
+		switch opTok._type {
 		case tokenStar:
 			op = shared.OpMultiply
 		case tokenFSlash:
@@ -196,7 +196,7 @@ func (p *parser) parseCall() (shared.Node, error) {
 	switch v := left.(type) {
 	case shared.IdentNode:
 		tok, ok := p.peek()
-		if !ok || tok.Type != tokenLParen {
+		if !ok || tok._type != tokenLParen {
 			return nil, nil
 		}
 
@@ -213,7 +213,7 @@ func (p *parser) parseCall() (shared.Node, error) {
 			if !ok {
 				return p.error("Reached end while parsing call expression")
 			}
-			if tok.Type == tokenRParen {
+			if tok._type == tokenRParen {
 				break
 			}
 
@@ -228,8 +228,8 @@ func (p *parser) parseCall() (shared.Node, error) {
 			if !ok {
 				return p.error("Reached end while parsing call expression")
 			}
-			if tok.Type != tokenRParen {
-				if tok.Type == tokenComma {
+			if tok._type != tokenRParen {
+				if tok._type == tokenComma {
 					p.consumeExpected(tokenComma)
 				} else {
 					return p.error("Arguments were not separated by a comma in a call expression")
@@ -273,7 +273,7 @@ func (p *parser) parseLeaf() (shared.Node, error) {
 
 func (p *parser) parseIdent() (shared.Node, error) {
 	tok, ok := p.peek()
-	if !ok || tok.Type != tokenIdent {
+	if !ok || tok._type != tokenIdent {
 		return nil, nil
 	}
 
@@ -282,12 +282,12 @@ func (p *parser) parseIdent() (shared.Node, error) {
 		return nil, err
 	}
 
-	return shared.IdentNode{Name: tok.Literal, Pos: tok.Pos}, nil
+	return shared.IdentNode{Name: tok.literal, Pos: tok.pos}, nil
 }
 
 func (p *parser) parseNumber() (shared.Node, error) {
 	tok, ok := p.peek()
-	if !ok || tok.Type != tokenNumber {
+	if !ok || tok._type != tokenNumber {
 		return nil, nil
 	}
 
@@ -296,10 +296,10 @@ func (p *parser) parseNumber() (shared.Node, error) {
 		return nil, err
 	}
 
-	n, err := strconv.Atoi(tok.Literal)
+	n, err := strconv.Atoi(tok.literal)
 	if err != nil {
 		return p.error("Failed to parse int")
 	}
 
-	return shared.IntLiteral{Value: n, Pos: tok.Pos}, nil
+	return shared.IntLiteral{Value: n, Pos: tok.pos}, nil
 }

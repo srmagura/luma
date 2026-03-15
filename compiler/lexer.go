@@ -57,13 +57,13 @@ func (t tokenType) String() string {
 }
 
 type token struct {
-	Type    tokenType
-	Literal string
-	Pos     int
+	_type   tokenType
+	literal string
+	pos     int
 }
 
 func (t token) String() string {
-	return fmt.Sprintf("token{%s, %q}", t.Type, t.Literal)
+	return fmt.Sprintf("token{%s, %q}", t._type, t.literal)
 }
 
 type lexer struct {
@@ -112,13 +112,13 @@ func (l *lexer) next() token {
 	}
 }
 
-func Lex(src string) []token {
+func lex(src string) []token {
 	var tokens []token
 	lexer := newLexer(src)
 
 	for {
 		token := lexer.next()
-		if token.Type == tokenEOF {
+		if token._type == tokenEOF {
 			break
 		}
 
@@ -142,11 +142,11 @@ func (l *lexer) advance(typ tokenType) token {
 }
 
 func (l *lexer) make(typ tokenType, lit string) token {
-	return token{Type: typ, Literal: lit, Pos: l.pos}
+	return token{_type: typ, literal: lit, pos: l.pos}
 }
 
 func (l *lexer) makeRange(typ tokenType, start int) token {
-	return token{Type: typ, Literal: string(l.src[start:l.pos]), Pos: start}
+	return token{_type: typ, literal: string(l.src[start:l.pos]), pos: start}
 }
 
 func (l *lexer) readIdent() token {

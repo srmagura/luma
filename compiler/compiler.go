@@ -10,15 +10,15 @@ import (
 )
 
 func Compile(src string) (shared.Node, error) {
-	src = NormalizeSource(src)
-	tokens := Lex(src)
+	src = normalizeSource(src)
+	tokens := lex(src)
 
 	for _, token := range tokens {
-		if token.Type == tokenUnknown {
-			line, col := GetLineColFromPosition(src, token.Pos)
+		if token._type == tokenUnknown {
+			line, col := getLineColFromPosition(src, token.pos)
 
 			return nil, &CompilerError{
-				Message: fmt.Sprintf("Unknown token: %s", token.Literal),
+				Message: fmt.Sprintf("Unknown token: %s", token.literal),
 				Line:    line,
 				Col:     col,
 			}
@@ -30,10 +30,10 @@ func Compile(src string) (shared.Node, error) {
 	if err != nil {
 		internalParserErr, ok := errors.AsType[*internalCompilerError](err)
 		if !ok {
-			log.Fatalln("Could not cast error to ParserError")
+			log.Fatalln("Could not cast error to internalCompilerError")
 		}
 
-		line, col := GetLineColFromPosition(src, internalParserErr.pos)
+		line, col := getLineColFromPosition(src, internalParserErr.pos)
 
 		return nil, &CompilerError{
 			Message: internalParserErr.message,
@@ -45,11 +45,27 @@ func Compile(src string) (shared.Node, error) {
 	return ast, nil
 }
 
-func NormalizeSource(src string) string {
+func compileCore(src string) (shared.Node, error) {
+	src = normalizeSource(src)
+	tokens := lex(src)
+
+	for _, tok := range tokens {
+		if tok._type == tokenUnknown {
+			return nil, &internalCompilerError{
+				message: fmt.Sprintf("Unknown token: %s", tok.literal),
+				pos:     tok.pos,
+			}
+		}
+	}
+
+	return parse(tokens)
+}
+
+func normalizeSource(src string) string {
 	return strings.ReplaceAll(src, "\r\n", "\n")
 }
 
-func GetLineColFromPosition(src string, pos int) (int, int) {
+func getLineColFromPosition(src string, pos int) (int, int) {
 	line := 0
 	col := 0
 

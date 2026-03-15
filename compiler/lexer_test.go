@@ -5,15 +5,15 @@ import (
 )
 
 func testCore(t *testing.T, src string, expected []string) {
-	actual := Lex(src)
+	actual := lex(src)
 
 	for i := range expected {
-		if actual[i].Type == tokenUnknown {
-			t.Fatalf("Unknown token: %s", actual[i].Literal)
+		if actual[i]._type == tokenUnknown {
+			t.Fatalf("Unknown token: %s", actual[i].literal)
 		}
 
-		if actual[i].Literal != expected[i] {
-			t.Fatalf("Expected: %s    Actual: %s", expected[i], actual[i].Literal)
+		if actual[i].literal != expected[i] {
+			t.Fatalf("Expected: %s    Actual: %s", expected[i], actual[i].literal)
 		}
 	}
 
