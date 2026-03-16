@@ -8,7 +8,11 @@ import (
 type Op byte
 
 const (
-	OpAdd Op = iota
+	OpPositive Op = iota
+	OpNegate
+	OpPostfixIncrement
+	OpPostfixDecrement
+	OpAdd
 	OpSubtract
 	OpMultiply
 	OpDivide
@@ -21,6 +25,14 @@ const (
 
 func (op Op) String() string {
 	switch op {
+	case OpPositive:
+		return "+"
+	case OpNegate:
+		return "-"
+	case OpPostfixIncrement:
+		return "x++"
+	case OpPostfixDecrement:
+		return "x--"
 	case OpAdd:
 		return "+"
 	case OpSubtract:
@@ -46,7 +58,6 @@ func (op Op) String() string {
 
 type Node interface {
 	nodeTag()
-	//GetPos() int
 }
 
 // --- Leaf nodes ---
@@ -62,6 +73,12 @@ type IdentNode struct {
 }
 
 // --- Interior nodes ---
+
+type UnaryExpr struct {
+	Op    Op
+	Value Node
+	Pos   int
+}
 
 type BinaryExpr struct {
 	Op    Op
@@ -90,22 +107,13 @@ type ModuleNode struct {
 
 // --- Implement the sealed interface ---
 
-func (IntLiteral) nodeTag() {}
-
-// func (n IntLiteral) GetPos() int { return n.Pos }
-func (IdentNode) nodeTag() {}
-
-// func (n IdentNode) GetPos() int  { return n.Pos }
-func (BinaryExpr) nodeTag() {}
-
-// func (n BinaryExpr) GetPos() int { return n.Pos }
+func (IntLiteral) nodeTag()          {}
+func (IdentNode) nodeTag()           {}
+func (UnaryExpr) nodeTag()           {}
+func (BinaryExpr) nodeTag()          {}
 func (CallExpr) nodeTag()            {}
 func (AssignmentStatement) nodeTag() {}
-
-// func (n CallExpr) GetPos() int   { return n.Pos }
-func (ModuleNode) nodeTag() {}
-
-//func (n ModuleNode) GetPos() int { return n.Pos }
+func (ModuleNode) nodeTag()          {}
 
 // --- Pretty printer: indented tree view ---
 
@@ -140,6 +148,10 @@ func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLa
 
 	case IdentNode:
 		fmt.Fprintf(sb, "%s%sIdent(%s)\n", prefix, connector, v.Name)
+
+	case UnaryExpr:
+		fmt.Fprintf(sb, "%s%sUnaryExpr(%s)\n", prefix, connector, v.Op)
+		stringifyNode(sb, v.Value, childPrefix, false, true)
 
 	case BinaryExpr:
 		fmt.Fprintf(sb, "%s%sBinaryExpr(%s)\n", prefix, connector, v.Op)

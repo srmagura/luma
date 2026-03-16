@@ -11,6 +11,7 @@ type (
 	Node                = shared.Node
 	IntLiteral          = shared.IntLiteral
 	IdentNode           = shared.IdentNode
+	UnaryExpr           = shared.UnaryExpr
 	BinaryExpr          = shared.BinaryExpr
 	CallExpr            = shared.CallExpr
 	AssignmentStatement = shared.AssignmentStatement

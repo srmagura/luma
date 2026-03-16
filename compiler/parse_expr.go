@@ -92,7 +92,7 @@ func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 
 // Handle *, /, and ~/
 func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
-	left, err := p.parseCallExpr()
+	left, err := p.parseNegateExpr()
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 			op = shared.OpDivideInteger
 		}
 
-		right, err := p.parseCallExpr()
+		right, err := p.parseNegateExpr()
 		if err != nil {
 			return nil, err
 		}
@@ -127,6 +127,62 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 	}
 
 	return left, nil
+}
+
+// Handle +x and -x
+func (p *parser) parseNegateExpr() (shared.Node, error) {
+	peeked, ok := p.peek()
+	if !ok || (peeked._type != tokenPlus && peeked._type != tokenMinus) {
+		return p.parsePostfixExpr()
+	}
+
+	opTok, err := p.consume()
+	if err != nil {
+		return nil, err
+	}
+
+	var op shared.Op
+	switch opTok._type {
+	case tokenPlus:
+		op = shared.OpPositive
+	case tokenMinus:
+		op = shared.OpNegate
+	}
+
+	value, err := p.parseNegateExpr()
+	if err != nil {
+		return nil, err
+	}
+
+	return shared.UnaryExpr{Op: op, Value: value, Pos: opTok.pos}, nil
+}
+
+// Handle x++ and x--
+func (p *parser) parsePostfixExpr() (shared.Node, error) {
+	value, err := p.parseCallExpr()
+	if err != nil {
+		return nil, err
+	}
+
+	peeked, ok := p.peek()
+	if !ok || (peeked._type != tokenPlusPlus && peeked._type != tokenMinusMinus) {
+		return value, nil
+	}
+
+	opTok, err := p.consume()
+	if err != nil {
+		return nil, err
+	}
+
+	var op shared.Op
+	switch opTok._type {
+	case tokenPlusPlus:
+		op = shared.OpPostfixIncrement
+	case tokenMinusMinus:
+		op = shared.OpPostfixDecrement
+	}
+
+	return shared.UnaryExpr{Op: op, Value: value, Pos: opTok.pos}, nil
 }
 
 func (p *parser) parseCallExpr() (shared.Node, error) {

@@ -87,6 +87,36 @@ func TestIdent(t *testing.T) {
 	testSuccessfulExprCompilation(t, src, expected)
 }
 
+func TestPositive(t *testing.T) {
+	src := "+1"
+	expected := UnaryExpr{
+		Op:    shared.OpPositive,
+		Value: IntLiteral{Value: 1},
+	}
+	testSuccessfulExprCompilation(t, src, expected)
+}
+
+func TestNegate(t *testing.T) {
+	src := "+-1"
+	expected := UnaryExpr{
+		Op: shared.OpPositive,
+		Value: UnaryExpr{
+			Op:    shared.OpNegate,
+			Value: IntLiteral{Value: 1},
+		},
+	}
+	testSuccessfulExprCompilation(t, src, expected)
+}
+
+func TestPostfixIncrement(t *testing.T) {
+	src := "x++"
+	expected := UnaryExpr{
+		Op:    shared.OpPostfixIncrement,
+		Value: IdentNode{Name: "x"},
+	}
+	testSuccessfulExprCompilation(t, src, expected)
+}
+
 func TestAddition(t *testing.T) {
 	src := "2 - 3 + 4"
 	expected := BinaryExpr{

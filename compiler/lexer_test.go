@@ -22,7 +22,14 @@ func testSuccessfulLex(t *testing.T, src string, expected []string, expectedType
 	}
 }
 
-func TestLexOperators(t *testing.T) {
+func TestLexUnaryOperators(t *testing.T) {
+	src := "+ - ++ --"
+	expected := []string{"+", "-", "++", "--"}
+	expectedTypes := []tokenType{tokenPlus, tokenMinus, tokenPlusPlus, tokenMinusMinus}
+	testSuccessfulLex(t, src, expected, expectedTypes)
+}
+
+func TestLexBinaryOperators(t *testing.T) {
 	src := "+-*/~/="
 	expected := []string{"+", "-", "*", "/", "~/", "="}
 	expectedTypes := []tokenType{tokenPlus, tokenMinus, tokenStar, tokenFSlash, tokenTildeFSlash, tokenEqual}

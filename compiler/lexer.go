@@ -12,7 +12,9 @@ const (
 	tokenEOF
 	tokenNumber
 	tokenPlus
+	tokenPlusPlus
 	tokenMinus
+	tokenMinusMinus
 	tokenStar
 	tokenFSlash
 	tokenTildeFSlash
@@ -40,8 +42,12 @@ func (t tokenType) String() string {
 		return "Number"
 	case tokenPlus:
 		return "Plus"
+	case tokenPlusPlus:
+		return "PlusPlus"
 	case tokenMinus:
 		return "Minus"
+	case tokenMinusMinus:
+		return "MinusMinus"
 	case tokenStar:
 		return "Star"
 	case tokenFSlash:
@@ -111,9 +117,9 @@ func (l *lexer) next() token {
 	case unicode.IsDigit(ch):
 		return l.readNumber()
 	case ch == '+':
-		return l.advance(tokenPlus)
+		return l.readPlus()
 	case ch == '-':
-		return l.advance(tokenMinus)
+		return l.readMinus()
 	case ch == '*':
 		return l.advance(tokenStar)
 	case ch == '/':
@@ -230,6 +236,28 @@ func (l *lexer) readNumber() token {
 	}
 
 	return l.makeRange(tokenNumber, start)
+}
+
+func (l *lexer) readPlus() token {
+	start := l.pos
+
+	if l.pos+1 < len(l.src) && l.src[l.pos+1] == '+' {
+		l.pos += 2
+		return l.makeRange(tokenPlusPlus, start)
+	}
+
+	return l.advance(tokenPlus)
+}
+
+func (l *lexer) readMinus() token {
+	start := l.pos
+
+	if l.pos+1 < len(l.src) && l.src[l.pos+1] == '-' {
+		l.pos += 2
+		return l.makeRange(tokenMinusMinus, start)
+	}
+
+	return l.advance(tokenMinus)
 }
 
 func (l *lexer) readTildeFSlash() token {
