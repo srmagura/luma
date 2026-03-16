@@ -4,5 +4,8 @@ print(x);
 var y = x + 2;
 print(y);
 
+y = x + 3;
+print(y);
+
 print(x++);
 print(x);
