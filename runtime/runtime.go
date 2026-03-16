@@ -124,6 +124,31 @@ func (env *env) evalBinaryExpr(n shared.BinaryExpr) (int, error) {
 		//	return left / right
 	case shared.OpDivideInteger:
 		return left / right, nil
+		// TODO implement booleans
+	case shared.OpLessThan:
+		if left < right {
+			return 1, nil
+		} else {
+			return 0, nil
+		}
+	case shared.OpGreaterThan:
+		if left > right {
+			return 1, nil
+		} else {
+			return 0, nil
+		}
+	case shared.OpLessThanEq:
+		if left <= right {
+			return 1, nil
+		} else {
+			return 0, nil
+		}
+	case shared.OpGreaterThanEq:
+		if left >= right {
+			return 1, nil
+		} else {
+			return 0, nil
+		}
 	default:
 		return 0, &internalRuntimeError{
 			message: fmt.Sprintf("Unexpected binary operator: %s", n.Op),
