@@ -165,3 +165,21 @@ func TestCall4(t *testing.T) {
 	expectedMessage := "Arguments were not separated by a comma in a call expression"
 	testFailedExprCompilation(t, src, expectedMessage, 0)
 }
+
+func TestComparison(t *testing.T) {
+	src := "0 * 1 > 2 + 3"
+	expected := BinaryExpr{
+		Op: shared.OpGreaterThan,
+		Left: BinaryExpr{
+			Op:    shared.OpMultiply,
+			Left:  IntLiteral{Value: 0},
+			Right: IntLiteral{Value: 1},
+		},
+		Right: BinaryExpr{
+			Op:    shared.OpAdd,
+			Left:  IntLiteral{Value: 2},
+			Right: IntLiteral{Value: 3},
+		},
+	}
+	testSuccessfulExprCompilation(t, src, expected)
+}

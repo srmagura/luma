@@ -1,2 +1,5 @@
-var prevPrev = 1;
-print(prevPrev);
+var x = 1;
+print(x);
+
+var y = x + 2;
+print(y);

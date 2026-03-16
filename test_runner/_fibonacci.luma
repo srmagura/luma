@@ -5,9 +5,9 @@ var prev = 1;
 print(prev);
 
 for (var i = 2; i < 10; i++) {
-  var curr = prev + prevPrev;
-  print(curr);
+    var curr = prev + prevPrev;
+    print(curr);
 
-  prevPrev = prev;
-  prev = curr;
+    prevPrev = prev;
+    prev = curr;
 }

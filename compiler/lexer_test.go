@@ -29,6 +29,13 @@ func TestLexOperators(t *testing.T) {
 	testSuccessfulLex(t, src, expected, expectedTypes)
 }
 
+func TestLexComparisonOperators(t *testing.T) {
+	src := "<<= >>="
+	expected := []string{"<", "<=", ">", ">="}
+	expectedTypes := []tokenType{tokenLAngle, tokenLAngleEq, tokenRAngle, tokenRAngleEq}
+	testSuccessfulLex(t, src, expected, expectedTypes)
+}
+
 func TestLexIdent(t *testing.T) {
 	src := "1_test2+abC a_b"
 	expected := []string{"1", "_test2", "+", "abC", "a_b"}

@@ -24,6 +24,10 @@ const (
 	tokenEqual
 	tokenVar
 	tokenFor
+	tokenLAngle
+	tokenRAngle
+	tokenLAngleEq
+	tokenRAngleEq
 )
 
 func (t tokenType) String() string {
@@ -60,6 +64,14 @@ func (t tokenType) String() string {
 		return "Int"
 	case tokenFor:
 		return "For"
+	case tokenLAngle:
+		return "LAngle"
+	case tokenRAngle:
+		return "RAngle"
+	case tokenLAngleEq:
+		return "LAngleEq"
+	case tokenRAngleEq:
+		return "RAngleEq"
 	default:
 		return "Could not convert tokenType to string"
 	}
@@ -118,6 +130,10 @@ func (l *lexer) next() token {
 		return l.advance(tokenSemi)
 	case ch == '=':
 		return l.advance(tokenEqual)
+	case ch == '<':
+		return l.readLAngle()
+	case ch == '>':
+		return l.readRAngle()
 	default:
 		return l.advance(tokenUnknown)
 	}
@@ -219,10 +235,32 @@ func (l *lexer) readNumber() token {
 func (l *lexer) readTildeFSlash() token {
 	start := l.pos
 
-	if l.pos+1 < len(l.src) && l.src[l.pos] == '~' && l.src[l.pos+1] == '/' {
+	if l.pos+1 < len(l.src) && l.src[l.pos+1] == '/' {
 		l.pos += 2
 		return l.makeRange(tokenTildeFSlash, start)
 	}
 
 	return token{}
+}
+
+func (l *lexer) readLAngle() token {
+	start := l.pos
+
+	if l.pos+1 < len(l.src) && l.src[l.pos+1] == '=' {
+		l.pos += 2
+		return l.makeRange(tokenLAngleEq, start)
+	}
+
+	return l.advance(tokenLAngle)
+}
+
+func (l *lexer) readRAngle() token {
+	start := l.pos
+
+	if l.pos+1 < len(l.src) && l.src[l.pos+1] == '=' {
+		l.pos += 2
+		return l.makeRange(tokenRAngleEq, start)
+	}
+
+	return l.advance(tokenRAngle)
 }

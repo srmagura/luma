@@ -7,7 +7,50 @@ import (
 )
 
 func (p *parser) parseExpr() (shared.Node, error) {
-	return p.parseAdditiveExpr()
+	return p.parseComparisonExpr()
+}
+
+func (p *parser) parseComparisonExpr() (shared.Node, error) {
+	left, err := p.parseAdditiveExpr()
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		peeked, ok := p.peek()
+		if !ok || (peeked._type != tokenLAngle &&
+			peeked._type != tokenRAngle &&
+			peeked._type != tokenLAngleEq &&
+			peeked._type != tokenRAngleEq) {
+			break
+		}
+
+		opTok, err := p.consume()
+		if err != nil {
+			return nil, err
+		}
+
+		var op shared.Op
+		switch opTok._type {
+		case tokenLAngle:
+			op = shared.OpLessThan
+		case tokenRAngle:
+			op = shared.OpGreaterThan
+		case tokenLAngleEq:
+			op = shared.OpLessThanEq
+		case tokenRAngleEq:
+			op = shared.OpGreaterThanEq
+		}
+
+		right, err := p.parseAdditiveExpr()
+		if err != nil {
+			return nil, err
+		}
+
+		left = shared.BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
+	}
+
+	return left, nil
 }
 
 // Handle + and -

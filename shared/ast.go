@@ -13,6 +13,10 @@ const (
 	OpMultiply
 	OpDivide
 	OpDivideInteger
+	OpLessThan
+	OpGreaterThan
+	OpLessThanEq
+	OpGreaterThanEq
 )
 
 func (op Op) String() string {
@@ -27,6 +31,14 @@ func (op Op) String() string {
 		return "/"
 	case OpDivideInteger:
 		return "~/"
+	case OpLessThan:
+		return "<"
+	case OpGreaterThan:
+		return ">"
+	case OpLessThanEq:
+		return "<="
+	case OpGreaterThanEq:
+		return ">="
 	default:
 		return "UnknownOp"
 	}
