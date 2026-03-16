@@ -8,11 +8,15 @@ import (
 )
 
 type env struct {
-	out io.Writer
+	out       io.Writer
+	variables map[string]int
 }
 
 func Execute(ast shared.Node, out io.Writer) error {
-	env := &env{out: out}
+	env := &env{
+		out:       out,
+		variables: make(map[string]int),
+	}
 
 	_, err := env.evalNode(ast)
 	if err != nil {
@@ -26,10 +30,14 @@ func (env *env) evalNode(n shared.Node) (int, error) {
 	switch v := n.(type) {
 	case shared.ModuleNode:
 		return env.evalModule(v)
+	case shared.AssignmentStatement:
+		return env.evalAssignmentStatement(v)
 	case shared.CallExpr:
 		return env.evalCallExpr(v)
 	case shared.BinaryExpr:
 		return env.evalBinaryExpr(v)
+	case shared.IdentNode:
+		return env.evalIdent(v)
 	case shared.IntLiteral:
 		return v.Value, nil
 	default:
@@ -48,7 +56,18 @@ func (env *env) evalModule(n shared.ModuleNode) (int, error) {
 		}
 	}
 
-	return 0, nil
+	return 0, nil // TODO change to returning void
+}
+
+func (env *env) evalAssignmentStatement(n shared.AssignmentStatement) (int, error) {
+	value, err := env.evalNode(n.Value)
+	if err != nil {
+		return 0, err
+	}
+
+	env.variables[n.Name] = value
+
+	return 0, nil // TODO change to returning void
 }
 
 func (env *env) evalCallExpr(n shared.CallExpr) (int, error) {
@@ -111,4 +130,16 @@ func (env *env) evalBinaryExpr(n shared.BinaryExpr) (int, error) {
 			pos:     n.Pos,
 		}
 	}
+}
+
+func (env *env) evalIdent(n shared.IdentNode) (int, error) {
+	value, ok := env.variables[n.Name]
+	if !ok {
+		return 0, &internalRuntimeError{
+			message: fmt.Sprintf("Undefined variable: %s", n.Name),
+			pos:     n.Pos,
+		}
+	}
+
+	return value, nil
 }

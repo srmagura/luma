@@ -49,7 +49,7 @@ func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 
 // Handle *, /, and ~/
 func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
-	left, err := p.parseCall()
+	left, err := p.parseCallExpr()
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 			op = shared.OpDivideInteger
 		}
 
-		right, err := p.parseCall()
+		right, err := p.parseCallExpr()
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +86,7 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 	return left, nil
 }
 
-func (p *parser) parseCall() (shared.Node, error) {
+func (p *parser) parseCallExpr() (shared.Node, error) {
 	left, err := p.parseLeaf()
 	if err != nil {
 		return nil, err
@@ -97,7 +97,8 @@ func (p *parser) parseCall() (shared.Node, error) {
 	case shared.IdentNode:
 		tok, ok := p.peek()
 		if !ok || tok._type != tokenLParen {
-			return nil, nil
+			// This is just an ident, not a call expr
+			return left, nil
 		}
 
 		tok, err = p.consumeExpected(tokenLParen)
@@ -177,7 +178,7 @@ func (p *parser) parseIdent() (shared.Node, error) {
 		return nil, nil
 	}
 
-	tok, err := p.consumeExpected(tokenIdent)
+	tok, err := p.consume()
 	if err != nil {
 		return nil, err
 	}

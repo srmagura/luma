@@ -1,0 +1,2 @@
+var prevPrev = 1;
+print(prevPrev);

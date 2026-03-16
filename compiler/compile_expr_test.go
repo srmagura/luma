@@ -34,11 +34,10 @@ func testFailedExprCompilation(t *testing.T, src string, expectedMessage string,
 		t.Fatalf("Could not cast error to InternalParserError: %s", err.Error())
 	}
 
-	line, col := getLineColFromPosition(src, internalParserErr.pos)
+	line, _ := getLineColFromPosition(src, internalParserErr.pos)
 	parserErr := CompilerError{
 		Message: internalParserErr.message,
 		Line:    line,
-		Col:     col,
 	}
 
 	if parserErr.Message != expectedMessage {
@@ -79,6 +78,12 @@ func TestInvalidtoken(t *testing.T) {
 func TestIntLiteral(t *testing.T) {
 	src := "2"
 	expected := IntLiteral{Value: 2}
+	testSuccessfulExprCompilation(t, src, expected)
+}
+
+func TestIdent(t *testing.T) {
+	src := "x"
+	expected := IdentNode{Name: "x"}
 	testSuccessfulExprCompilation(t, src, expected)
 }
 

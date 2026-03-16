@@ -1,2 +1,0 @@
-var prevPrev = 0;
-print(prevPrev);
