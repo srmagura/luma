@@ -34,6 +34,8 @@ func (env *env) evalNode(n shared.Node) (int, error) {
 		return env.evalAssignmentStatement(v)
 	case shared.CallExpr:
 		return env.evalCallExpr(v)
+	case shared.UnaryExpr:
+		return env.evalUnaryExpr(v)
 	case shared.BinaryExpr:
 		return env.evalBinaryExpr(v)
 	case shared.IdentNode:
@@ -96,6 +98,55 @@ func (env *env) evalCallExpr(n shared.CallExpr) (int, error) {
 	default:
 		return 0, &internalRuntimeError{
 			message: "Only identifiers are valid as a function",
+			pos:     n.Pos,
+		}
+	}
+}
+
+func (env *env) evalUnaryExpr(n shared.UnaryExpr) (int, error) {
+	switch n.Op {
+	case shared.OpPositive:
+		value, err := env.evalNode(n.Value)
+		if err != nil {
+			return 0, err
+		}
+
+		return value, nil
+	case shared.OpNegate:
+		value, err := env.evalNode(n.Value)
+		if err != nil {
+			return 0, err
+		}
+
+		return -value, nil
+	case shared.OpPostfixIncrement:
+		return env.evalPostfix(n)
+	case shared.OpPostfixDecrement:
+		return env.evalPostfix(n)
+	default:
+		return 0, &internalRuntimeError{
+			message: fmt.Sprintf("Unexpected unary operator: %s", n.Op),
+			pos:     n.Pos,
+		}
+	}
+}
+
+func (env *env) evalPostfix(n shared.UnaryExpr) (int, error) {
+	switch v := n.Value.(type) {
+	case shared.IdentNode:
+		value := env.variables[v.Name]
+
+		switch n.Op {
+		case shared.OpPostfixIncrement:
+			env.variables[v.Name]++
+		case shared.OpPostfixDecrement:
+			env.variables[v.Name]--
+		}
+
+		return value, nil
+	default:
+		return 0, &internalRuntimeError{
+			message: "Postfix operators can only be applied to identifiers",
 			pos:     n.Pos,
 		}
 	}
