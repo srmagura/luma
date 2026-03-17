@@ -2,11 +2,14 @@
 
 An interpreted programming language with compile-time type safety.
 
+## Example Programs
+
+- [Fibonnaci numbers](./test_runner/fibonacci.luma)
+
 ## Development
 
-Example testing commands:
+Example testing command:
 
 ```shell
-go test github.com/srmagura/luma/compiler
-go test -v -run ^TestIntLiteral$ github.com/srmagura/luma/compiler
+go test -v -run ^TestIntLiteral$ ./compiler
 ```

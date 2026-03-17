@@ -30,6 +30,8 @@ func (env *env) evalNode(n shared.Node) (int, error) {
 	switch v := n.(type) {
 	case shared.ModuleNode:
 		return env.evalModule(v)
+	case shared.ForBlock:
+		return env.evalForBlock(v)
 	case shared.DeclarationStatement:
 		return env.evalDeclarationStatement(v)
 	case shared.AssignmentStatement:
@@ -46,21 +48,51 @@ func (env *env) evalNode(n shared.Node) (int, error) {
 		return v.Value, nil
 	default:
 		return 0, &internalRuntimeError{
-			message: fmt.Sprintf("evalNode: Unexpected node type: %s", n),
+			message: "evalNode: Unexpected node type",
 			pos:     0, // OK to set position to 0 since this error indicates a bug in luma
 		}
 	}
 }
 
 func (env *env) evalModule(n shared.ModuleNode) (int, error) {
-	for _, v := range n.Children {
-		_, err := env.evalNode(v)
+	return env.evalManyBlocks(n.Children)
+}
+
+func (env *env) evalManyBlocks(blocks []shared.Node) (int, error) {
+	for _, block := range blocks {
+		_, err := env.evalNode(block)
 		if err != nil {
 			return 0, err
 		}
 	}
 
 	return 0, nil // TODO change to returning void
+}
+
+func (env *env) evalForBlock(n shared.ForBlock) (int, error) {
+	_, err := env.evalNode(n.Statement1)
+	if err != nil {
+		return 0, err
+	}
+
+	for {
+		condition, err := env.evalNode(n.Expr2)
+		if err != nil {
+			return 0, err
+		}
+		if condition == 0 {
+			break
+		}
+
+		env.evalManyBlocks(n.Children)
+
+		_, err = env.evalNode(n.Expr3)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return 0, nil
 }
 
 func (env *env) evalDeclarationStatement(n shared.DeclarationStatement) (int, error) {

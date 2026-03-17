@@ -5,7 +5,7 @@ import (
 )
 
 func (p *parser) parseModule() (shared.Node, error) {
-	children, err := p.parseManyBlock()
+	children, err := p.parseManyBlocks()
 	if err != nil {
 		return nil, err
 	}
@@ -13,7 +13,7 @@ func (p *parser) parseModule() (shared.Node, error) {
 	return shared.ModuleNode{Children: children, Pos: 0}, nil
 }
 
-func (p *parser) parseManyBlock() ([]shared.Node, error) {
+func (p *parser) parseManyBlocks() ([]shared.Node, error) {
 	var blocks []shared.Node
 
 	for {
@@ -80,7 +80,7 @@ func (p *parser) parseForBlock() (shared.Node, error) {
 		return nil, err
 	}
 
-	children, err := p.parseManyBlock()
+	children, err := p.parseManyBlocks()
 
 	_, err = p.consumeExpected(tokenRBrace)
 	if err != nil {
