@@ -36,12 +36,14 @@ func (p *parser) error(message string) (shared.Node, error) {
 	}
 }
 
-func (p *parser) peek() (token, bool) {
-	if p.pos >= len(p.tokens) {
+func (p *parser) peek(offset int) (token, bool) {
+	i := p.pos + offset
+
+	if i >= len(p.tokens) {
 		return token{}, false
 	}
 
-	return p.tokens[p.pos], true
+	return p.tokens[i], true
 }
 
 func (p *parser) consumeExpected(expected tokenType) (token, error) {

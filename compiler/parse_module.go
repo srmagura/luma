@@ -29,7 +29,15 @@ func (p *parser) parseStatement() (shared.Node, error) {
 		return nil, nil
 	}
 
-	n, err := p.parseAssignmentStatement()
+	n, err := p.parseDeclarationStatement()
+	if err != nil {
+		return nil, err
+	}
+	if n != nil {
+		return n, err
+	}
+
+	n, err = p.parseAssignmentStatement()
 	if err != nil {
 		return nil, err
 	}
@@ -42,13 +50,13 @@ func (p *parser) parseStatement() (shared.Node, error) {
 
 var semicolonErrorMessage = "Statements must be terminated by a semicolon"
 
-func (p *parser) parseAssignmentStatement() (shared.Node, error) {
-	varTok, ok := p.peek()
+func (p *parser) parseDeclarationStatement() (shared.Node, error) {
+	varTok, ok := p.peek(0)
 	if !ok || varTok._type != tokenVar {
 		return nil, nil
 	}
 
-	varTok, err := p.consume()
+	_, err := p.consume()
 	if err != nil {
 		return nil, err
 	}
@@ -73,10 +81,48 @@ func (p *parser) parseAssignmentStatement() (shared.Node, error) {
 		return p.error(semicolonErrorMessage)
 	}
 
-	return shared.AssignmentStatement{
+	return shared.DeclarationStatement{
 		Name:  identTok.literal,
 		Value: expr,
 		Pos:   varTok.pos,
+	}, nil
+}
+
+func (p *parser) parseAssignmentStatement() (shared.Node, error) {
+	identTok, ok := p.peek(0)
+	if !ok || identTok._type != tokenIdent {
+		return nil, nil
+	}
+
+	eqTok, ok := p.peek(1)
+	if !ok || eqTok._type != tokenEqual {
+		return nil, nil
+	}
+
+	_, err := p.consume()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume()
+	if err != nil {
+		return nil, err
+	}
+
+	expr, err := p.parseExpr()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consumeExpected(tokenSemi)
+	if err != nil {
+		return p.error(semicolonErrorMessage)
+	}
+
+	return shared.AssignmentStatement{
+		Name:  identTok.literal,
+		Value: expr,
+		Pos:   identTok.pos,
 	}, nil
 }
 

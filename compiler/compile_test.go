@@ -41,8 +41,25 @@ func TestExprStatement(t *testing.T) {
 	testSuccessfulCompilation(t, src, expected)
 }
 
-func TestAssignmentStatement(t *testing.T) {
+func TestDeclarationStatementWithInitialValue(t *testing.T) {
 	src := "var x = 7 + 8;"
+	expected := ModuleNode{
+		Children: []Node{
+			DeclarationStatement{
+				Name: "x",
+				Value: BinaryExpr{
+					Op:    shared.OpAdd,
+					Left:  IntLiteral{Value: 7},
+					Right: IntLiteral{Value: 8},
+				},
+			},
+		},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}
+
+func TestAssignmentStatement(t *testing.T) {
+	src := "x = 7 + 8;"
 	expected := ModuleNode{
 		Children: []Node{
 			AssignmentStatement{

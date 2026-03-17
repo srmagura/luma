@@ -17,7 +17,7 @@ func (p *parser) parseComparisonExpr() (shared.Node, error) {
 	}
 
 	for {
-		peeked, ok := p.peek()
+		peeked, ok := p.peek(0)
 		if !ok || (peeked._type != tokenLAngle &&
 			peeked._type != tokenRAngle &&
 			peeked._type != tokenLAngleEq &&
@@ -61,7 +61,7 @@ func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 	}
 
 	for {
-		peeked, ok := p.peek()
+		peeked, ok := p.peek(0)
 		if !ok || (peeked._type != tokenPlus && peeked._type != tokenMinus) {
 			break
 		}
@@ -98,7 +98,7 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 	}
 
 	for {
-		peeked, ok := p.peek()
+		peeked, ok := p.peek(0)
 		if !ok || (peeked._type != tokenStar && peeked._type != tokenFSlash && peeked._type != tokenTildeFSlash) {
 			break
 		}
@@ -131,7 +131,7 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 
 // Handle +x and -x
 func (p *parser) parseNegateExpr() (shared.Node, error) {
-	peeked, ok := p.peek()
+	peeked, ok := p.peek(0)
 	if !ok || (peeked._type != tokenPlus && peeked._type != tokenMinus) {
 		return p.parsePostfixExpr()
 	}
@@ -164,7 +164,7 @@ func (p *parser) parsePostfixExpr() (shared.Node, error) {
 		return nil, err
 	}
 
-	peeked, ok := p.peek()
+	peeked, ok := p.peek(0)
 	if !ok || (peeked._type != tokenPlusPlus && peeked._type != tokenMinusMinus) {
 		return value, nil
 	}
@@ -194,7 +194,7 @@ func (p *parser) parseCallExpr() (shared.Node, error) {
 	// Does not handle parenthesized functions (yet?)
 	switch v := left.(type) {
 	case shared.IdentNode:
-		tok, ok := p.peek()
+		tok, ok := p.peek(0)
 		if !ok || tok._type != tokenLParen {
 			// This is just an ident, not a call expr
 			return left, nil
@@ -208,7 +208,7 @@ func (p *parser) parseCallExpr() (shared.Node, error) {
 		args := []shared.Node{}
 
 		for {
-			tok, ok = p.peek()
+			tok, ok = p.peek(0)
 			if !ok {
 				return p.error("Reached end while parsing call expression")
 			}
@@ -223,7 +223,7 @@ func (p *parser) parseCallExpr() (shared.Node, error) {
 
 			args = append(args, arg)
 
-			tok, ok = p.peek()
+			tok, ok = p.peek(0)
 			if !ok {
 				return p.error("Reached end while parsing call expression")
 			}
@@ -272,7 +272,7 @@ func (p *parser) parseLeaf() (shared.Node, error) {
 }
 
 func (p *parser) parseIdent() (shared.Node, error) {
-	tok, ok := p.peek()
+	tok, ok := p.peek(0)
 	if !ok || tok._type != tokenIdent {
 		return nil, nil
 	}
@@ -286,7 +286,7 @@ func (p *parser) parseIdent() (shared.Node, error) {
 }
 
 func (p *parser) parseNumber() (shared.Node, error) {
-	tok, ok := p.peek()
+	tok, ok := p.peek(0)
 	if !ok || tok._type != tokenNumber {
 		return nil, nil
 	}

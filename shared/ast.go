@@ -93,8 +93,13 @@ type CallExpr struct {
 	Pos  int
 }
 
+type DeclarationStatement struct {
+	Name  string
+	Value Node // optional
+	Pos   int
+}
+
 type AssignmentStatement struct {
-	// TODO declared type
 	Name  string
 	Value Node
 	Pos   int
@@ -107,13 +112,14 @@ type ModuleNode struct {
 
 // --- Implement the sealed interface ---
 
-func (IntLiteral) nodeTag()          {}
-func (IdentNode) nodeTag()           {}
-func (UnaryExpr) nodeTag()           {}
-func (BinaryExpr) nodeTag()          {}
-func (CallExpr) nodeTag()            {}
-func (AssignmentStatement) nodeTag() {}
-func (ModuleNode) nodeTag()          {}
+func (IntLiteral) nodeTag()           {}
+func (IdentNode) nodeTag()            {}
+func (UnaryExpr) nodeTag()            {}
+func (BinaryExpr) nodeTag()           {}
+func (CallExpr) nodeTag()             {}
+func (DeclarationStatement) nodeTag() {}
+func (AssignmentStatement) nodeTag()  {}
+func (ModuleNode) nodeTag()           {}
 
 // --- Pretty printer: indented tree view ---
 
@@ -164,6 +170,13 @@ func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLa
 
 		for i, arg := range v.Args {
 			stringifyNode(sb, arg, childPrefix, false, i == len(v.Args)-1)
+		}
+
+	case DeclarationStatement:
+		fmt.Fprintf(sb, "%s%sDeclarationStatement(%s)\n", prefix, connector, v.Name)
+
+		if v.Value != nil {
+			stringifyNode(sb, v.Value, childPrefix, false, true)
 		}
 
 	case AssignmentStatement:
