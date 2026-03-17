@@ -16,6 +16,7 @@ type (
 	CallExpr             = shared.CallExpr
 	DeclarationStatement = shared.DeclarationStatement
 	AssignmentStatement  = shared.AssignmentStatement
+	ForBlock             = shared.ForBlock
 	ModuleNode           = shared.ModuleNode
 )
 

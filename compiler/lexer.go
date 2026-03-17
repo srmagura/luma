@@ -30,6 +30,8 @@ const (
 	tokenRAngle
 	tokenLAngleEq
 	tokenRAngleEq
+	tokenLBrace
+	tokenRBrace
 )
 
 func (t tokenType) String() string {
@@ -78,6 +80,10 @@ func (t tokenType) String() string {
 		return "LAngleEq"
 	case tokenRAngleEq:
 		return "RAngleEq"
+	case tokenLBrace:
+		return "LBrace"
+	case tokenRBrace:
+		return "RBrace"
 	default:
 		return "Could not convert tokenType to string"
 	}
@@ -130,6 +136,10 @@ func (l *lexer) next() token {
 		return l.advance(tokenLParen)
 	case ch == ')':
 		return l.advance(tokenRParen)
+	case ch == '{':
+		return l.advance(tokenLBrace)
+	case ch == '}':
+		return l.advance(tokenRBrace)
 	case ch == ',':
 		return l.advance(tokenComma)
 	case ch == ';':

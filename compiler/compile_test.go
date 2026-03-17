@@ -74,3 +74,39 @@ func TestAssignmentStatement(t *testing.T) {
 	}
 	testSuccessfulCompilation(t, src, expected)
 }
+
+func TestForBlock(t *testing.T) {
+	src := `
+	for var i = 0; i < 10; i++ {
+		print(i);
+	}
+	`
+	expected := ModuleNode{
+		Children: []Node{
+			ForBlock{
+				Statement1: DeclarationStatement{
+					Name:  "i",
+					Value: IntLiteral{Value: 0},
+				},
+				Expr2: BinaryExpr{
+					Op:    shared.OpLessThan,
+					Left:  IdentNode{Name: "i"},
+					Right: IntLiteral{Value: 10},
+				},
+				Expr3: UnaryExpr{
+					Op:    shared.OpPostfixIncrement,
+					Value: IdentNode{Name: "i"},
+				},
+				Children: []Node{
+					CallExpr{
+						Func: IdentNode{Name: "print"},
+						Args: []Node{
+							IdentNode{Name: "i"},
+						},
+					},
+				},
+			},
+		},
+	}
+	testSuccessfulCompilation(t, src, expected)
+}

@@ -58,8 +58,8 @@ func TestKeyword(t *testing.T) {
 }
 
 func TestLexDelimiters(t *testing.T) {
-	src := ";,()"
-	expected := []string{";", ",", "(", ")"}
-	expectedTypes := []tokenType{tokenSemi, tokenComma, tokenLParen, tokenRParen}
+	src := ";,(){}"
+	expected := []string{";", ",", "(", ")", "{", "}"}
+	expectedTypes := []tokenType{tokenSemi, tokenComma, tokenLParen, tokenRParen, tokenLBrace, tokenRBrace}
 	testSuccessfulLex(t, src, expected, expectedTypes)
 }

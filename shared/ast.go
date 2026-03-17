@@ -105,6 +105,14 @@ type AssignmentStatement struct {
 	Pos   int
 }
 
+type ForBlock struct {
+	Statement1 Node
+	Expr2      Node
+	Expr3      Node
+	Children   []Node
+	Pos        int
+}
+
 type ModuleNode struct {
 	Children []Node
 	Pos      int
@@ -119,6 +127,7 @@ func (BinaryExpr) nodeTag()           {}
 func (CallExpr) nodeTag()             {}
 func (DeclarationStatement) nodeTag() {}
 func (AssignmentStatement) nodeTag()  {}
+func (ForBlock) nodeTag()             {}
 func (ModuleNode) nodeTag()           {}
 
 // --- Pretty printer: indented tree view ---
@@ -182,6 +191,16 @@ func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLa
 	case AssignmentStatement:
 		fmt.Fprintf(sb, "%s%sAssignmentStatement(%s)\n", prefix, connector, v.Name)
 		stringifyNode(sb, v.Value, childPrefix, false, true)
+
+	case ForBlock:
+		fmt.Fprintf(sb, "%s%sFor\n", prefix, connector)
+		stringifyNode(sb, v.Statement1, childPrefix, false, false)
+		stringifyNode(sb, v.Expr2, childPrefix, false, false)
+		stringifyNode(sb, v.Expr3, childPrefix, false, len(v.Children) == 0)
+
+		for i, child := range v.Children {
+			stringifyNode(sb, child, childPrefix, false, i == len(v.Children)-1)
+		}
 
 	case ModuleNode:
 		fmt.Fprintf(sb, "%s%sModule\n", prefix, connector)
