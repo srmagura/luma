@@ -4,4 +4,4 @@ An interpreted programming language with compile-time type safety.
 
 ## Example Programs
 
-- [Fibonnaci numbers](./test_runner/fibonacci.luma)
+- [Fibonacci numbers](./test_runner/fibonacci.luma)
