@@ -18,15 +18,20 @@ func TestAll(t *testing.T) {
 	}
 
 	for _, entry := range entries {
-		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".luma" && filepath.Base(entry.Name())[0] != '_' {
-			runTest(t, entry.Name())
+		if !entry.IsDir() &&
+			filepath.Ext(entry.Name()) == ".luma" &&
+			filepath.Base(entry.Name())[0] != '_' {
+			t.Run(
+				filepath.Base(entry.Name()),
+				func(t *testing.T) {
+					runTest(t, entry.Name())
+				},
+			)
 		}
 	}
 }
 
 func runTest(t *testing.T, srcPath string) {
-	t.Logf("==== %s ====", filepath.Base(srcPath))
-
 	srcBytes, err := os.ReadFile(srcPath)
 	if err != nil {
 		t.Fatal("Failed to read the source file.")
