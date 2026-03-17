@@ -106,9 +106,9 @@ type AssignmentStatement struct {
 }
 
 type ForBlock struct {
-	Statement1 Node
-	Expr2      Node
-	Expr3      Node
+	Statement1 Node // optional
+	Expr2      Node // optional
+	Expr3      Node // optional
 	Children   []Node
 	Pos        int
 }
