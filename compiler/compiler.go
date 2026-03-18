@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
-	"github.com/srmagura/luma/shared"
 )
 
-func Compile(src string) (shared.Node, error) {
+func Compile(src string) (Node, error) {
 	src = normalizeSource(src)
 	tokens := lex(src)
 
@@ -45,7 +43,7 @@ func Compile(src string) (shared.Node, error) {
 	return ast, nil
 }
 
-func compileCore(src string) (shared.Node, error) {
+func compileCore(src string) (Node, error) {
 	src = normalizeSource(src)
 	tokens := lex(src)
 

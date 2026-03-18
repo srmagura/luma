@@ -2,15 +2,13 @@ package compiler
 
 import (
 	"strconv"
-
-	"github.com/srmagura/luma/shared"
 )
 
-func (p *parser) parseExpr() (shared.Node, error) {
+func (p *parser) parseExpr() (Node, error) {
 	return p.parseComparisonExpr()
 }
 
-func (p *parser) parseComparisonExpr() (shared.Node, error) {
+func (p *parser) parseComparisonExpr() (Node, error) {
 	left, err := p.parseAdditiveExpr()
 	if err != nil {
 		return nil, err
@@ -30,16 +28,16 @@ func (p *parser) parseComparisonExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		var op shared.Op
+		var op Op
 		switch opTok._type {
 		case tokenLAngle:
-			op = shared.OpLessThan
+			op = OpLessThan
 		case tokenRAngle:
-			op = shared.OpGreaterThan
+			op = OpGreaterThan
 		case tokenLAngleEq:
-			op = shared.OpLessThanEq
+			op = OpLessThanEq
 		case tokenRAngleEq:
-			op = shared.OpGreaterThanEq
+			op = OpGreaterThanEq
 		}
 
 		right, err := p.parseAdditiveExpr()
@@ -47,14 +45,14 @@ func (p *parser) parseComparisonExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		left = shared.BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
+		left = BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
 	}
 
 	return left, nil
 }
 
 // Handle + and -
-func (p *parser) parseAdditiveExpr() (shared.Node, error) {
+func (p *parser) parseAdditiveExpr() (Node, error) {
 	left, err := p.parseMultiplicativeExpr()
 	if err != nil {
 		return nil, err
@@ -71,12 +69,12 @@ func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		var op shared.Op
+		var op Op
 		switch opTok._type {
 		case tokenPlus:
-			op = shared.OpAdd
+			op = OpAdd
 		case tokenMinus:
-			op = shared.OpSubtract
+			op = OpSubtract
 		}
 
 		right, err := p.parseMultiplicativeExpr()
@@ -84,14 +82,14 @@ func (p *parser) parseAdditiveExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		left = shared.BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
+		left = BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
 	}
 
 	return left, nil
 }
 
 // Handle *, /, and ~/
-func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
+func (p *parser) parseMultiplicativeExpr() (Node, error) {
 	left, err := p.parseNegateExpr()
 	if err != nil {
 		return nil, err
@@ -108,14 +106,14 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		var op shared.Op
+		var op Op
 		switch opTok._type {
 		case tokenStar:
-			op = shared.OpMultiply
+			op = OpMultiply
 		case tokenFSlash:
-			op = shared.OpDivide
+			op = OpDivide
 		case tokenTildeFSlash:
-			op = shared.OpDivideInteger
+			op = OpDivideInteger
 		}
 
 		right, err := p.parseNegateExpr()
@@ -123,14 +121,14 @@ func (p *parser) parseMultiplicativeExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		left = shared.BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
+		left = BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
 	}
 
 	return left, nil
 }
 
 // Handle +x and -x
-func (p *parser) parseNegateExpr() (shared.Node, error) {
+func (p *parser) parseNegateExpr() (Node, error) {
 	peeked, ok := p.peek(0)
 	if !ok || (peeked._type != tokenPlus && peeked._type != tokenMinus) {
 		return p.parsePostfixExpr()
@@ -141,12 +139,12 @@ func (p *parser) parseNegateExpr() (shared.Node, error) {
 		return nil, err
 	}
 
-	var op shared.Op
+	var op Op
 	switch opTok._type {
 	case tokenPlus:
-		op = shared.OpPositive
+		op = OpPositive
 	case tokenMinus:
-		op = shared.OpNegate
+		op = OpNegate
 	}
 
 	value, err := p.parseNegateExpr()
@@ -154,11 +152,11 @@ func (p *parser) parseNegateExpr() (shared.Node, error) {
 		return nil, err
 	}
 
-	return shared.UnaryExpr{Op: op, Value: value, Pos: opTok.pos}, nil
+	return UnaryExpr{Op: op, Value: value, Pos: opTok.pos}, nil
 }
 
 // Handle x++ and x--
-func (p *parser) parsePostfixExpr() (shared.Node, error) {
+func (p *parser) parsePostfixExpr() (Node, error) {
 	value, err := p.parseCallExpr()
 	if err != nil {
 		return nil, err
@@ -174,18 +172,18 @@ func (p *parser) parsePostfixExpr() (shared.Node, error) {
 		return nil, err
 	}
 
-	var op shared.Op
+	var op Op
 	switch opTok._type {
 	case tokenPlusPlus:
-		op = shared.OpPostfixIncrement
+		op = OpPostfixIncrement
 	case tokenMinusMinus:
-		op = shared.OpPostfixDecrement
+		op = OpPostfixDecrement
 	}
 
-	return shared.UnaryExpr{Op: op, Value: value, Pos: opTok.pos}, nil
+	return UnaryExpr{Op: op, Value: value, Pos: opTok.pos}, nil
 }
 
-func (p *parser) parseCallExpr() (shared.Node, error) {
+func (p *parser) parseCallExpr() (Node, error) {
 	left, err := p.parseLeaf()
 	if err != nil {
 		return nil, err
@@ -193,7 +191,7 @@ func (p *parser) parseCallExpr() (shared.Node, error) {
 
 	// Does not handle parenthesized functions (yet?)
 	switch v := left.(type) {
-	case shared.IdentNode:
+	case IdentNode:
 		tok, ok := p.peek(0)
 		if !ok || tok._type != tokenLParen {
 			// This is just an ident, not a call expr
@@ -205,7 +203,7 @@ func (p *parser) parseCallExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		args := []shared.Node{}
+		args := []Node{}
 
 		for {
 			tok, ok = p.peek(0)
@@ -241,7 +239,7 @@ func (p *parser) parseCallExpr() (shared.Node, error) {
 			return nil, err
 		}
 
-		left = shared.CallExpr{
+		left = CallExpr{
 			Func: v,
 			Args: args,
 			Pos:  v.Pos,
@@ -251,7 +249,7 @@ func (p *parser) parseCallExpr() (shared.Node, error) {
 	return left, nil
 }
 
-func (p *parser) parseLeaf() (shared.Node, error) {
+func (p *parser) parseLeaf() (Node, error) {
 	node, err := p.parseIdent()
 	if err != nil {
 		return nil, err
@@ -271,7 +269,7 @@ func (p *parser) parseLeaf() (shared.Node, error) {
 	return nil, nil
 }
 
-func (p *parser) parseIdent() (shared.Node, error) {
+func (p *parser) parseIdent() (Node, error) {
 	tok, ok := p.peek(0)
 	if !ok || tok._type != tokenIdent {
 		return nil, nil
@@ -282,10 +280,10 @@ func (p *parser) parseIdent() (shared.Node, error) {
 		return nil, err
 	}
 
-	return shared.IdentNode{Name: tok.literal, Pos: tok.pos}, nil
+	return IdentNode{Name: tok.literal, Pos: tok.pos}, nil
 }
 
-func (p *parser) parseNumber() (shared.Node, error) {
+func (p *parser) parseNumber() (Node, error) {
 	tok, ok := p.peek(0)
 	if !ok || tok._type != tokenNumber {
 		return nil, nil
@@ -301,5 +299,5 @@ func (p *parser) parseNumber() (shared.Node, error) {
 		return p.error("Failed to parse int")
 	}
 
-	return shared.IntLiteral{Value: n, Pos: tok.pos}, nil
+	return IntLiteral{Value: n, Pos: tok.pos}, nil
 }

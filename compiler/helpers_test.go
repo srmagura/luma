@@ -3,26 +3,11 @@ package compiler
 import (
 	"strings"
 	"testing"
-
-	"github.com/srmagura/luma/shared"
-)
-
-type (
-	Node                 = shared.Node
-	IntLiteral           = shared.IntLiteral
-	IdentNode            = shared.IdentNode
-	UnaryExpr            = shared.UnaryExpr
-	BinaryExpr           = shared.BinaryExpr
-	CallExpr             = shared.CallExpr
-	DeclarationStatement = shared.DeclarationStatement
-	AssignmentStatement  = shared.AssignmentStatement
-	ForBlock             = shared.ForBlock
-	ModuleNode           = shared.ModuleNode
 )
 
 func compareASTs(t *testing.T, expected Node, actual Node) {
-	expectedString := shared.StringifyAST(expected)
-	actualString := shared.StringifyAST(actual)
+	expectedString := StringifyAST(expected)
+	actualString := StringifyAST(actual)
 
 	t.Logf("EXPECTED:\n%s\n", expectedString)
 	t.Logf("ACTUAL:\n%s\n", actualString)

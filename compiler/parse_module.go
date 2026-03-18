@@ -1,20 +1,16 @@
 package compiler
 
-import (
-	"github.com/srmagura/luma/shared"
-)
-
-func (p *parser) parseModule() (shared.Node, error) {
+func (p *parser) parseModule() (Node, error) {
 	children, err := p.parseManyBlocks()
 	if err != nil {
 		return nil, err
 	}
 
-	return shared.ModuleNode{Children: children, Pos: 0}, nil
+	return ModuleNode{Children: children, Pos: 0}, nil
 }
 
-func (p *parser) parseManyBlocks() ([]shared.Node, error) {
-	var blocks []shared.Node
+func (p *parser) parseManyBlocks() ([]Node, error) {
+	var blocks []Node
 
 	for {
 		block, err := p.parseBlock()
@@ -32,7 +28,7 @@ func (p *parser) parseManyBlocks() ([]shared.Node, error) {
 	return blocks, nil
 }
 
-func (p *parser) parseBlock() (shared.Node, error) {
+func (p *parser) parseBlock() (Node, error) {
 	n, err := p.parseForBlock()
 	if err != nil {
 		return nil, err
@@ -44,7 +40,7 @@ func (p *parser) parseBlock() (shared.Node, error) {
 	return p.parseStatement()
 }
 
-func (p *parser) parseForBlock() (shared.Node, error) {
+func (p *parser) parseForBlock() (Node, error) {
 	forTok, ok := p.peek(0)
 	if !ok || forTok._type != tokenFor {
 		return nil, nil
@@ -87,7 +83,7 @@ func (p *parser) parseForBlock() (shared.Node, error) {
 		return nil, err
 	}
 
-	return shared.ForBlock{
+	return ForBlock{
 		Statement1: statement1,
 		Expr2:      expr2,
 		Expr3:      expr3,

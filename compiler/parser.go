@@ -2,8 +2,6 @@ package compiler
 
 import (
 	"fmt"
-
-	"github.com/srmagura/luma/shared"
 )
 
 type parser struct {
@@ -15,7 +13,7 @@ func newParser(tokens []token) *parser {
 	return &parser{tokens: tokens, pos: 0}
 }
 
-func parse(tokens []token) (shared.Node, error) {
+func parse(tokens []token) (Node, error) {
 	p := newParser(tokens)
 	ast, err := p.parseModule()
 
@@ -29,7 +27,7 @@ func parse(tokens []token) (shared.Node, error) {
 	return ast, err
 }
 
-func (p *parser) error(message string) (shared.Node, error) {
+func (p *parser) error(message string) (Node, error) {
 	return nil, &internalCompilerError{
 		message: message,
 		pos:     p.pos,

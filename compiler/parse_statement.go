@@ -1,10 +1,6 @@
 package compiler
 
-import (
-	"github.com/srmagura/luma/shared"
-)
-
-func (p *parser) parseStatement() (shared.Node, error) {
+func (p *parser) parseStatement() (Node, error) {
 	n, err := p.parseDeclarationStatement()
 	if err != nil {
 		return nil, err
@@ -26,7 +22,7 @@ func (p *parser) parseStatement() (shared.Node, error) {
 
 var semicolonErrorMessage = "Statements must be terminated by a semicolon"
 
-func (p *parser) parseDeclarationStatement() (shared.Node, error) {
+func (p *parser) parseDeclarationStatement() (Node, error) {
 	varTok, ok := p.peek(0)
 	if !ok || varTok._type != tokenVar {
 		return nil, nil
@@ -57,14 +53,14 @@ func (p *parser) parseDeclarationStatement() (shared.Node, error) {
 		return p.error(semicolonErrorMessage)
 	}
 
-	return shared.DeclarationStatement{
+	return DeclarationStatement{
 		Name:  identTok.literal,
 		Value: expr,
 		Pos:   varTok.pos,
 	}, nil
 }
 
-func (p *parser) parseAssignmentStatement() (shared.Node, error) {
+func (p *parser) parseAssignmentStatement() (Node, error) {
 	identTok, ok := p.peek(0)
 	if !ok || identTok._type != tokenIdent {
 		return nil, nil
@@ -95,14 +91,14 @@ func (p *parser) parseAssignmentStatement() (shared.Node, error) {
 		return p.error(semicolonErrorMessage)
 	}
 
-	return shared.AssignmentStatement{
+	return AssignmentStatement{
 		Name:  identTok.literal,
 		Value: expr,
 		Pos:   identTok.pos,
 	}, nil
 }
 
-func (p *parser) parseExprStatement() (shared.Node, error) {
+func (p *parser) parseExprStatement() (Node, error) {
 	n, err := p.parseExpr()
 	if err != nil {
 		return nil, err

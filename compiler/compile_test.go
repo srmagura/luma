@@ -2,8 +2,6 @@ package compiler
 
 import (
 	"testing"
-
-	"github.com/srmagura/luma/shared"
 )
 
 func testSuccessfulCompilation(t *testing.T, src string, expected Node) {
@@ -32,7 +30,7 @@ func TestExprStatement(t *testing.T) {
 				Args: []Node{IntLiteral{Value: 11}},
 			},
 			BinaryExpr{
-				Op:    shared.OpMultiply,
+				Op:    OpMultiply,
 				Left:  IntLiteral{Value: 1},
 				Right: IntLiteral{Value: 2},
 			},
@@ -48,7 +46,7 @@ func TestDeclarationStatementWithInitialValue(t *testing.T) {
 			DeclarationStatement{
 				Name: "x",
 				Value: BinaryExpr{
-					Op:    shared.OpAdd,
+					Op:    OpAdd,
 					Left:  IntLiteral{Value: 7},
 					Right: IntLiteral{Value: 8},
 				},
@@ -65,7 +63,7 @@ func TestAssignmentStatement(t *testing.T) {
 			AssignmentStatement{
 				Name: "x",
 				Value: BinaryExpr{
-					Op:    shared.OpAdd,
+					Op:    OpAdd,
 					Left:  IntLiteral{Value: 7},
 					Right: IntLiteral{Value: 8},
 				},
@@ -89,12 +87,12 @@ func TestForBlock(t *testing.T) {
 					Value: IntLiteral{Value: 0},
 				},
 				Expr2: BinaryExpr{
-					Op:    shared.OpLessThan,
+					Op:    OpLessThan,
 					Left:  IdentNode{Name: "i"},
 					Right: IntLiteral{Value: 10},
 				},
 				Expr3: UnaryExpr{
-					Op:    shared.OpPostfixIncrement,
+					Op:    OpPostfixIncrement,
 					Value: IdentNode{Name: "i"},
 				},
 				Children: []Node{

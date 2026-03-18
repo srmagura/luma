@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"testing"
-
-	"github.com/srmagura/luma/shared"
 )
 
 func compileExpr(src string) (Node, error) {
@@ -51,16 +49,7 @@ func testFailedExprCompilation(t *testing.T, src string, expectedMessage string,
 	// Not bothering to test Col
 }
 
-// func testSuccessfulExprCompilation(t *testing.T, src string, expected shared.Node) {
-// 	actual, err := Compile(src)
-// 	if err != nil {
-// 		t.Fatalf("Compilation failed\n%s", err.Error())
-// 	}
-
-// 	compareASTs(t, expected, actual)
-// }
-
-func testSuccessfulExprCompilation(t *testing.T, src string, expected shared.Node) {
+func testSuccessfulExprCompilation(t *testing.T, src string, expected Node) {
 	actual, err := compileExpr(src)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -90,7 +79,7 @@ func TestIdent(t *testing.T) {
 func TestPositive(t *testing.T) {
 	src := "+1"
 	expected := UnaryExpr{
-		Op:    shared.OpPositive,
+		Op:    OpPositive,
 		Value: IntLiteral{Value: 1},
 	}
 	testSuccessfulExprCompilation(t, src, expected)
@@ -99,9 +88,9 @@ func TestPositive(t *testing.T) {
 func TestNegate(t *testing.T) {
 	src := "+-1"
 	expected := UnaryExpr{
-		Op: shared.OpPositive,
+		Op: OpPositive,
 		Value: UnaryExpr{
-			Op:    shared.OpNegate,
+			Op:    OpNegate,
 			Value: IntLiteral{Value: 1},
 		},
 	}
@@ -111,7 +100,7 @@ func TestNegate(t *testing.T) {
 func TestPostfixIncrement(t *testing.T) {
 	src := "x++"
 	expected := UnaryExpr{
-		Op:    shared.OpPostfixIncrement,
+		Op:    OpPostfixIncrement,
 		Value: IdentNode{Name: "x"},
 	}
 	testSuccessfulExprCompilation(t, src, expected)
@@ -120,9 +109,9 @@ func TestPostfixIncrement(t *testing.T) {
 func TestAddition(t *testing.T) {
 	src := "2 - 3 + 4"
 	expected := BinaryExpr{
-		Op: shared.OpAdd,
+		Op: OpAdd,
 		Left: BinaryExpr{
-			Op:    shared.OpSubtract,
+			Op:    OpSubtract,
 			Left:  IntLiteral{Value: 2},
 			Right: IntLiteral{Value: 3},
 		},
@@ -134,11 +123,11 @@ func TestAddition(t *testing.T) {
 func TestMultiplication(t *testing.T) {
 	src := "5 / 2 * 3 ~/ 7"
 	expected := BinaryExpr{
-		Op: shared.OpDivideInteger,
+		Op: OpDivideInteger,
 		Left: BinaryExpr{
-			Op: shared.OpMultiply,
+			Op: OpMultiply,
 			Left: BinaryExpr{
-				Op:    shared.OpDivide,
+				Op:    OpDivide,
 				Left:  IntLiteral{Value: 5},
 				Right: IntLiteral{Value: 2},
 			},
@@ -164,7 +153,7 @@ func TestCall2(t *testing.T) {
 		Func: IdentNode{Name: "print"},
 		Args: []Node{
 			BinaryExpr{
-				Op:    shared.OpMultiply,
+				Op:    OpMultiply,
 				Left:  IntLiteral{Value: 2},
 				Right: IntLiteral{Value: 3},
 			},
@@ -179,7 +168,7 @@ func TestCall3(t *testing.T) {
 		Func: IdentNode{Name: "print"},
 		Args: []Node{
 			BinaryExpr{
-				Op:    shared.OpMultiply,
+				Op:    OpMultiply,
 				Left:  IntLiteral{Value: 2},
 				Right: IntLiteral{Value: 3},
 			},
@@ -199,14 +188,14 @@ func TestCall4(t *testing.T) {
 func TestComparison(t *testing.T) {
 	src := "0 * 1 > 2 + 3"
 	expected := BinaryExpr{
-		Op: shared.OpGreaterThan,
+		Op: OpGreaterThan,
 		Left: BinaryExpr{
-			Op:    shared.OpMultiply,
+			Op:    OpMultiply,
 			Left:  IntLiteral{Value: 0},
 			Right: IntLiteral{Value: 1},
 		},
 		Right: BinaryExpr{
-			Op:    shared.OpAdd,
+			Op:    OpAdd,
 			Left:  IntLiteral{Value: 2},
 			Right: IntLiteral{Value: 3},
 		},
