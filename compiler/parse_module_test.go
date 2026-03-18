@@ -1,13 +1,30 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
-func testSuccessfulCompilation(t *testing.T, src string, expected Node) {
-	actual, err := Compile(src)
+func parseModule(src string) (Node, error) {
+	src = normalizeSource(src)
+	tokens := lex(src)
+
+	for _, token := range tokens {
+		if token._type == tokenUnknown {
+			return nil, &internalCompilerError{
+				message: fmt.Sprintf("Unknown token: %s", token.literal),
+				pos:     token.pos,
+			}
+		}
+	}
+
+	return parse(tokens)
+}
+
+func testSuccessfulParse(t *testing.T, src string, expected Node) {
+	actual, err := parseModule(src)
 	if err != nil {
-		t.Fatalf("Compilation failed\n%s", err.Error())
+		t.Fatalf("Parsing failed: %s\n", err.Error())
 	}
 
 	compareASTs(t, expected, actual)
@@ -18,7 +35,7 @@ func TestEmptyModule(t *testing.T) {
 	expected := ModuleNode{
 		Children: []Node{},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulParse(t, src, expected)
 }
 
 func TestExprStatement(t *testing.T) {
@@ -36,7 +53,7 @@ func TestExprStatement(t *testing.T) {
 			},
 		},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulParse(t, src, expected)
 }
 
 func TestDeclarationStatementWithInitialValue(t *testing.T) {
@@ -53,7 +70,7 @@ func TestDeclarationStatementWithInitialValue(t *testing.T) {
 			},
 		},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulParse(t, src, expected)
 }
 
 func TestAssignmentStatement(t *testing.T) {
@@ -70,7 +87,7 @@ func TestAssignmentStatement(t *testing.T) {
 			},
 		},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulParse(t, src, expected)
 }
 
 func TestForBlock(t *testing.T) {
@@ -106,5 +123,5 @@ func TestForBlock(t *testing.T) {
 			},
 		},
 	}
-	testSuccessfulCompilation(t, src, expected)
+	testSuccessfulParse(t, src, expected)
 }

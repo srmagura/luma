@@ -1,6 +1,6 @@
 # The Luma Programming Language
 
-An interpreted programming language with compile-time type safety.
+A programming language with compile-time type safety that compiles into bytecode. The compiler is written in Go. The runtime is a stack-based virtual machine written in Rust.
 
 ## Example Programs
 
@@ -11,4 +11,5 @@ An interpreted programming language with compile-time type safety.
 Development is currently being done on Linux and macOS.
 
 - Build compiler: `go build -C compiler`
+- Test compiler: `go test -C compiler`
 - Run end-to-end tests: `./test.sh`

@@ -43,22 +43,6 @@ func Compile(src string) (Node, error) {
 	return ast, nil
 }
 
-func compileCore(src string) (Node, error) {
-	src = normalizeSource(src)
-	tokens := lex(src)
-
-	for _, tok := range tokens {
-		if tok._type == tokenUnknown {
-			return nil, &internalCompilerError{
-				message: fmt.Sprintf("Unknown token: %s", tok.literal),
-				pos:     tok.pos,
-			}
-		}
-	}
-
-	return parse(tokens)
-}
-
 func normalizeSource(src string) string {
 	return strings.ReplaceAll(src, "\r\n", "\n")
 }

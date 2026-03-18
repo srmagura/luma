@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func compileExpr(src string) (Node, error) {
+func parseExpr(src string) (Node, error) {
 	src = normalizeSource(src)
 	tokens := lex(src)
 
@@ -24,8 +24,8 @@ func compileExpr(src string) (Node, error) {
 
 }
 
-func testFailedExprCompilation(t *testing.T, src string, expectedMessage string, expectedLine int) {
-	_, err := compileExpr(src)
+func testFailedExprParse(t *testing.T, src string, expectedMessage string, expectedLine int) {
+	_, err := parseExpr(src)
 
 	internalParserErr, ok := errors.AsType[*internalCompilerError](err)
 	if !ok {
@@ -49,8 +49,8 @@ func testFailedExprCompilation(t *testing.T, src string, expectedMessage string,
 	// Not bothering to test Col
 }
 
-func testSuccessfulExprCompilation(t *testing.T, src string, expected Node) {
-	actual, err := compileExpr(src)
+func testSuccessfulExprParse(t *testing.T, src string, expected Node) {
+	actual, err := parseExpr(src)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -58,22 +58,22 @@ func testSuccessfulExprCompilation(t *testing.T, src string, expected Node) {
 	compareASTs(t, expected, actual)
 }
 
-func TestInvalidtoken(t *testing.T) {
+func TestInvalidToken(t *testing.T) {
 	src := "1@"
 	expectedMessage := "Unknown token: @"
-	testFailedExprCompilation(t, src, expectedMessage, 0)
+	testFailedExprParse(t, src, expectedMessage, 0)
 }
 
 func TestIntLiteral(t *testing.T) {
 	src := "2"
 	expected := IntLiteral{Value: 2}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestIdent(t *testing.T) {
 	src := "x"
 	expected := IdentNode{Name: "x"}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestPositive(t *testing.T) {
@@ -82,7 +82,7 @@ func TestPositive(t *testing.T) {
 		Operator: OperatorPositive,
 		Value:    IntLiteral{Value: 1},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestNegate(t *testing.T) {
@@ -94,7 +94,7 @@ func TestNegate(t *testing.T) {
 			Value:    IntLiteral{Value: 1},
 		},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestPostfixIncrement(t *testing.T) {
@@ -103,7 +103,7 @@ func TestPostfixIncrement(t *testing.T) {
 		Operator: OperatorPostfixIncrement,
 		Value:    IdentNode{Name: "x"},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestAddition(t *testing.T) {
@@ -117,7 +117,7 @@ func TestAddition(t *testing.T) {
 		},
 		Right: IntLiteral{Value: 4},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestMultiplication(t *testing.T) {
@@ -135,7 +135,7 @@ func TestMultiplication(t *testing.T) {
 		},
 		Right: IntLiteral{Value: 7},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestCall1(t *testing.T) {
@@ -144,7 +144,7 @@ func TestCall1(t *testing.T) {
 		Func: IdentNode{Name: "print"},
 		Args: []Node{},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestCall2(t *testing.T) {
@@ -159,7 +159,7 @@ func TestCall2(t *testing.T) {
 			},
 		},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestCall3(t *testing.T) {
@@ -176,13 +176,13 @@ func TestCall3(t *testing.T) {
 			IntLiteral{Value: 5},
 		},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
 
 func TestCall4(t *testing.T) {
 	src := "print(2 4)"
 	expectedMessage := "Arguments were not separated by a comma in a call expression"
-	testFailedExprCompilation(t, src, expectedMessage, 0)
+	testFailedExprParse(t, src, expectedMessage, 0)
 }
 
 func TestComparison(t *testing.T) {
@@ -200,5 +200,5 @@ func TestComparison(t *testing.T) {
 			Right:    IntLiteral{Value: 3},
 		},
 	}
-	testSuccessfulExprCompilation(t, src, expected)
+	testSuccessfulExprParse(t, src, expected)
 }
