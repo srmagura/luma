@@ -1,58 +1,58 @@
-package compiler
+package main
 
 import (
 	"fmt"
 	"strings"
 )
 
-type Op byte
+type Operator byte
 
 const (
-	OpPositive Op = iota
-	OpNegate
-	OpPostfixIncrement
-	OpPostfixDecrement
-	OpAdd
-	OpSubtract
-	OpMultiply
-	OpDivide
-	OpDivideInteger
-	OpLessThan
-	OpGreaterThan
-	OpLessThanEq
-	OpGreaterThanEq
+	OperatorPositive Operator = iota
+	OperatorNegate
+	OperatorPostfixIncrement
+	OperatorPostfixDecrement
+	OperatorAdd
+	OperatorSubtract
+	OperatorMultiply
+	OperatorDivide
+	OperatorDivideInteger
+	OperatorLessThan
+	OperatorGreaterThan
+	OperatorLessThanEq
+	OperatorGreaterThanEq
 )
 
-func (op Op) String() string {
-	switch op {
-	case OpPositive:
+func (operator Operator) String() string {
+	switch operator {
+	case OperatorPositive:
 		return "+"
-	case OpNegate:
+	case OperatorNegate:
 		return "-"
-	case OpPostfixIncrement:
+	case OperatorPostfixIncrement:
 		return "x++"
-	case OpPostfixDecrement:
+	case OperatorPostfixDecrement:
 		return "x--"
-	case OpAdd:
+	case OperatorAdd:
 		return "+"
-	case OpSubtract:
+	case OperatorSubtract:
 		return "-"
-	case OpMultiply:
+	case OperatorMultiply:
 		return "*"
-	case OpDivide:
+	case OperatorDivide:
 		return "/"
-	case OpDivideInteger:
+	case OperatorDivideInteger:
 		return "~/"
-	case OpLessThan:
+	case OperatorLessThan:
 		return "<"
-	case OpGreaterThan:
+	case OperatorGreaterThan:
 		return ">"
-	case OpLessThanEq:
+	case OperatorLessThanEq:
 		return "<="
-	case OpGreaterThanEq:
+	case OperatorGreaterThanEq:
 		return ">="
 	default:
-		return "UnknownOp"
+		return "UnknownOperator"
 	}
 }
 
@@ -63,7 +63,7 @@ type Node interface {
 // --- Leaf nodes ---
 
 type IntLiteral struct {
-	Value int
+	Value int32
 	Pos   int
 }
 
@@ -75,16 +75,16 @@ type IdentNode struct {
 // --- Interior nodes ---
 
 type UnaryExpr struct {
-	Op    Op
-	Value Node
-	Pos   int
+	Operator Operator
+	Value    Node
+	Pos      int
 }
 
 type BinaryExpr struct {
-	Op    Op
-	Left  Node
-	Right Node
-	Pos   int
+	Operator Operator
+	Left     Node
+	Right    Node
+	Pos      int
 }
 
 type CallExpr struct {
@@ -165,11 +165,11 @@ func stringifyNode(sb *strings.Builder, n Node, prefix string, isRoot bool, isLa
 		fmt.Fprintf(sb, "%s%sIdent(%s)\n", prefix, connector, v.Name)
 
 	case UnaryExpr:
-		fmt.Fprintf(sb, "%s%sUnaryExpr(%s)\n", prefix, connector, v.Op)
+		fmt.Fprintf(sb, "%s%sUnaryExpr(%s)\n", prefix, connector, v.Operator)
 		stringifyNode(sb, v.Value, childPrefix, false, true)
 
 	case BinaryExpr:
-		fmt.Fprintf(sb, "%s%sBinaryExpr(%s)\n", prefix, connector, v.Op)
+		fmt.Fprintf(sb, "%s%sBinaryExpr(%s)\n", prefix, connector, v.Operator)
 		stringifyNode(sb, v.Left, childPrefix, false, false)
 		stringifyNode(sb, v.Right, childPrefix, false, true)
 

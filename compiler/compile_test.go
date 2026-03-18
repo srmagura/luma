@@ -1,4 +1,4 @@
-package compiler
+package main
 
 import (
 	"testing"
@@ -30,9 +30,9 @@ func TestExprStatement(t *testing.T) {
 				Args: []Node{IntLiteral{Value: 11}},
 			},
 			BinaryExpr{
-				Op:    OpMultiply,
-				Left:  IntLiteral{Value: 1},
-				Right: IntLiteral{Value: 2},
+				Operator: OperatorMultiply,
+				Left:     IntLiteral{Value: 1},
+				Right:    IntLiteral{Value: 2},
 			},
 		},
 	}
@@ -46,9 +46,9 @@ func TestDeclarationStatementWithInitialValue(t *testing.T) {
 			DeclarationStatement{
 				Name: "x",
 				Value: BinaryExpr{
-					Op:    OpAdd,
-					Left:  IntLiteral{Value: 7},
-					Right: IntLiteral{Value: 8},
+					Operator: OperatorAdd,
+					Left:     IntLiteral{Value: 7},
+					Right:    IntLiteral{Value: 8},
 				},
 			},
 		},
@@ -63,9 +63,9 @@ func TestAssignmentStatement(t *testing.T) {
 			AssignmentStatement{
 				Name: "x",
 				Value: BinaryExpr{
-					Op:    OpAdd,
-					Left:  IntLiteral{Value: 7},
-					Right: IntLiteral{Value: 8},
+					Operator: OperatorAdd,
+					Left:     IntLiteral{Value: 7},
+					Right:    IntLiteral{Value: 8},
 				},
 			},
 		},
@@ -87,13 +87,13 @@ func TestForBlock(t *testing.T) {
 					Value: IntLiteral{Value: 0},
 				},
 				Expr2: BinaryExpr{
-					Op:    OpLessThan,
-					Left:  IdentNode{Name: "i"},
-					Right: IntLiteral{Value: 10},
+					Operator: OperatorLessThan,
+					Left:     IdentNode{Name: "i"},
+					Right:    IntLiteral{Value: 10},
 				},
 				Expr3: UnaryExpr{
-					Op:    OpPostfixIncrement,
-					Value: IdentNode{Name: "i"},
+					Operator: OperatorPostfixIncrement,
+					Value:    IdentNode{Name: "i"},
 				},
 				Children: []Node{
 					CallExpr{

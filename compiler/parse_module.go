@@ -1,4 +1,4 @@
-package compiler
+package main
 
 func (p *parser) parseModule() (Node, error) {
 	children, err := p.parseManyBlocks()

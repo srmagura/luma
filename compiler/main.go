@@ -3,9 +3,6 @@ package main
 import (
 	"log"
 	"os"
-
-	"github.com/srmagura/luma/compiler"
-	"github.com/srmagura/luma/runtime"
 )
 
 func main() {
@@ -22,13 +19,10 @@ func main() {
 
 	src := string(srcBytes)
 
-	ast, err := compiler.Compile(src)
+	ast, err := Compile(src)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = runtime.Execute(ast, os.Stdout)
-	if err != nil {
-		os.Exit(1)
-	}
+	PrintAST(ast)
 }

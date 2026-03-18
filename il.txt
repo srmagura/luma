@@ -1,0 +1,23 @@
+package il
+
+type Op byte
+
+const (
+	// ldc.i4 <int32 (num)>
+	OpLdcI4 Op = iota
+
+	// // stloc <uint16 (indx)>
+	// OpStloc
+
+	// // ldloc <uint16 (indx)>
+	// OpLdloc
+)
+
+func stringifyInstruction(il []byte, pos int) string {
+	switch op {
+	case OpLdcI4:
+		return "ldc.i4"
+	default:
+		return "unknown"
+	}
+}

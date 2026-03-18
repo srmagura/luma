@@ -1,4 +1,4 @@
-package compiler
+package main
 
 import (
 	"errors"
@@ -79,8 +79,8 @@ func TestIdent(t *testing.T) {
 func TestPositive(t *testing.T) {
 	src := "+1"
 	expected := UnaryExpr{
-		Op:    OpPositive,
-		Value: IntLiteral{Value: 1},
+		Operator: OperatorPositive,
+		Value:    IntLiteral{Value: 1},
 	}
 	testSuccessfulExprCompilation(t, src, expected)
 }
@@ -88,10 +88,10 @@ func TestPositive(t *testing.T) {
 func TestNegate(t *testing.T) {
 	src := "+-1"
 	expected := UnaryExpr{
-		Op: OpPositive,
+		Operator: OperatorPositive,
 		Value: UnaryExpr{
-			Op:    OpNegate,
-			Value: IntLiteral{Value: 1},
+			Operator: OperatorNegate,
+			Value:    IntLiteral{Value: 1},
 		},
 	}
 	testSuccessfulExprCompilation(t, src, expected)
@@ -100,8 +100,8 @@ func TestNegate(t *testing.T) {
 func TestPostfixIncrement(t *testing.T) {
 	src := "x++"
 	expected := UnaryExpr{
-		Op:    OpPostfixIncrement,
-		Value: IdentNode{Name: "x"},
+		Operator: OperatorPostfixIncrement,
+		Value:    IdentNode{Name: "x"},
 	}
 	testSuccessfulExprCompilation(t, src, expected)
 }
@@ -109,11 +109,11 @@ func TestPostfixIncrement(t *testing.T) {
 func TestAddition(t *testing.T) {
 	src := "2 - 3 + 4"
 	expected := BinaryExpr{
-		Op: OpAdd,
+		Operator: OperatorAdd,
 		Left: BinaryExpr{
-			Op:    OpSubtract,
-			Left:  IntLiteral{Value: 2},
-			Right: IntLiteral{Value: 3},
+			Operator: OperatorSubtract,
+			Left:     IntLiteral{Value: 2},
+			Right:    IntLiteral{Value: 3},
 		},
 		Right: IntLiteral{Value: 4},
 	}
@@ -123,13 +123,13 @@ func TestAddition(t *testing.T) {
 func TestMultiplication(t *testing.T) {
 	src := "5 / 2 * 3 ~/ 7"
 	expected := BinaryExpr{
-		Op: OpDivideInteger,
+		Operator: OperatorDivideInteger,
 		Left: BinaryExpr{
-			Op: OpMultiply,
+			Operator: OperatorMultiply,
 			Left: BinaryExpr{
-				Op:    OpDivide,
-				Left:  IntLiteral{Value: 5},
-				Right: IntLiteral{Value: 2},
+				Operator: OperatorDivide,
+				Left:     IntLiteral{Value: 5},
+				Right:    IntLiteral{Value: 2},
 			},
 			Right: IntLiteral{Value: 3},
 		},
@@ -153,9 +153,9 @@ func TestCall2(t *testing.T) {
 		Func: IdentNode{Name: "print"},
 		Args: []Node{
 			BinaryExpr{
-				Op:    OpMultiply,
-				Left:  IntLiteral{Value: 2},
-				Right: IntLiteral{Value: 3},
+				Operator: OperatorMultiply,
+				Left:     IntLiteral{Value: 2},
+				Right:    IntLiteral{Value: 3},
 			},
 		},
 	}
@@ -168,9 +168,9 @@ func TestCall3(t *testing.T) {
 		Func: IdentNode{Name: "print"},
 		Args: []Node{
 			BinaryExpr{
-				Op:    OpMultiply,
-				Left:  IntLiteral{Value: 2},
-				Right: IntLiteral{Value: 3},
+				Operator: OperatorMultiply,
+				Left:     IntLiteral{Value: 2},
+				Right:    IntLiteral{Value: 3},
 			},
 			IntLiteral{Value: 4},
 			IntLiteral{Value: 5},
@@ -188,16 +188,16 @@ func TestCall4(t *testing.T) {
 func TestComparison(t *testing.T) {
 	src := "0 * 1 > 2 + 3"
 	expected := BinaryExpr{
-		Op: OpGreaterThan,
+		Operator: OperatorGreaterThan,
 		Left: BinaryExpr{
-			Op:    OpMultiply,
-			Left:  IntLiteral{Value: 0},
-			Right: IntLiteral{Value: 1},
+			Operator: OperatorMultiply,
+			Left:     IntLiteral{Value: 0},
+			Right:    IntLiteral{Value: 1},
 		},
 		Right: BinaryExpr{
-			Op:    OpAdd,
-			Left:  IntLiteral{Value: 2},
-			Right: IntLiteral{Value: 3},
+			Operator: OperatorAdd,
+			Left:     IntLiteral{Value: 2},
+			Right:    IntLiteral{Value: 3},
 		},
 	}
 	testSuccessfulExprCompilation(t, src, expected)

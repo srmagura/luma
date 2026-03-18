@@ -1,4 +1,4 @@
-package compiler
+package main
 
 func (p *parser) parseStatement() (Node, error) {
 	n, err := p.parseDeclarationStatement()

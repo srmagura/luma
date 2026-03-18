@@ -1,4 +1,4 @@
-package compiler
+package main
 
 import (
 	"strconv"
@@ -28,16 +28,16 @@ func (p *parser) parseComparisonExpr() (Node, error) {
 			return nil, err
 		}
 
-		var op Op
+		var operator Operator
 		switch opTok._type {
 		case tokenLAngle:
-			op = OpLessThan
+			operator = OperatorLessThan
 		case tokenRAngle:
-			op = OpGreaterThan
+			operator = OperatorGreaterThan
 		case tokenLAngleEq:
-			op = OpLessThanEq
+			operator = OperatorLessThanEq
 		case tokenRAngleEq:
-			op = OpGreaterThanEq
+			operator = OperatorGreaterThanEq
 		}
 
 		right, err := p.parseAdditiveExpr()
@@ -45,7 +45,7 @@ func (p *parser) parseComparisonExpr() (Node, error) {
 			return nil, err
 		}
 
-		left = BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
+		left = BinaryExpr{Operator: operator, Left: left, Right: right, Pos: opTok.pos}
 	}
 
 	return left, nil
@@ -69,12 +69,12 @@ func (p *parser) parseAdditiveExpr() (Node, error) {
 			return nil, err
 		}
 
-		var op Op
+		var operator Operator
 		switch opTok._type {
 		case tokenPlus:
-			op = OpAdd
+			operator = OperatorAdd
 		case tokenMinus:
-			op = OpSubtract
+			operator = OperatorSubtract
 		}
 
 		right, err := p.parseMultiplicativeExpr()
@@ -82,7 +82,7 @@ func (p *parser) parseAdditiveExpr() (Node, error) {
 			return nil, err
 		}
 
-		left = BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
+		left = BinaryExpr{Operator: operator, Left: left, Right: right, Pos: opTok.pos}
 	}
 
 	return left, nil
@@ -106,14 +106,14 @@ func (p *parser) parseMultiplicativeExpr() (Node, error) {
 			return nil, err
 		}
 
-		var op Op
+		var operator Operator
 		switch opTok._type {
 		case tokenStar:
-			op = OpMultiply
+			operator = OperatorMultiply
 		case tokenFSlash:
-			op = OpDivide
+			operator = OperatorDivide
 		case tokenTildeFSlash:
-			op = OpDivideInteger
+			operator = OperatorDivideInteger
 		}
 
 		right, err := p.parseNegateExpr()
@@ -121,7 +121,7 @@ func (p *parser) parseMultiplicativeExpr() (Node, error) {
 			return nil, err
 		}
 
-		left = BinaryExpr{Op: op, Left: left, Right: right, Pos: opTok.pos}
+		left = BinaryExpr{Operator: operator, Left: left, Right: right, Pos: opTok.pos}
 	}
 
 	return left, nil
@@ -139,12 +139,12 @@ func (p *parser) parseNegateExpr() (Node, error) {
 		return nil, err
 	}
 
-	var op Op
+	var operator Operator
 	switch opTok._type {
 	case tokenPlus:
-		op = OpPositive
+		operator = OperatorPositive
 	case tokenMinus:
-		op = OpNegate
+		operator = OperatorNegate
 	}
 
 	value, err := p.parseNegateExpr()
@@ -152,7 +152,7 @@ func (p *parser) parseNegateExpr() (Node, error) {
 		return nil, err
 	}
 
-	return UnaryExpr{Op: op, Value: value, Pos: opTok.pos}, nil
+	return UnaryExpr{Operator: operator, Value: value, Pos: opTok.pos}, nil
 }
 
 // Handle x++ and x--
@@ -172,15 +172,15 @@ func (p *parser) parsePostfixExpr() (Node, error) {
 		return nil, err
 	}
 
-	var op Op
+	var operator Operator
 	switch opTok._type {
 	case tokenPlusPlus:
-		op = OpPostfixIncrement
+		operator = OperatorPostfixIncrement
 	case tokenMinusMinus:
-		op = OpPostfixDecrement
+		operator = OperatorPostfixDecrement
 	}
 
-	return UnaryExpr{Op: op, Value: value, Pos: opTok.pos}, nil
+	return UnaryExpr{Operator: operator, Value: value, Pos: opTok.pos}, nil
 }
 
 func (p *parser) parseCallExpr() (Node, error) {
@@ -294,10 +294,10 @@ func (p *parser) parseNumber() (Node, error) {
 		return nil, err
 	}
 
-	n, err := strconv.Atoi(tok.literal)
+	value, err := strconv.ParseInt(tok.literal, 10, 32)
 	if err != nil {
 		return p.error("Failed to parse int")
 	}
 
-	return IntLiteral{Value: n, Pos: tok.pos}, nil
+	return IntLiteral{Value: int32(value), Pos: tok.pos}, nil
 }
