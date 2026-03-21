@@ -3,11 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 )
 
-func Compile(src string) (Node, error) {
+func Compile(src string, out io.Writer) error {
 	src = normalizeSource(src)
 	tokens := lex(src)
 
@@ -15,7 +16,7 @@ func Compile(src string) (Node, error) {
 		if token._type == tokenUnknown {
 			line, col := getLineColFromPosition(src, token.pos)
 
-			return nil, &CompilerError{
+			return &CompilerError{
 				Message: fmt.Sprintf("Unknown token: %s", token.literal),
 				Line:    line,
 				Col:     col,
@@ -26,21 +27,37 @@ func Compile(src string) (Node, error) {
 	ast, err := parse(tokens)
 
 	if err != nil {
-		internalParserErr, ok := errors.AsType[*internalCompilerError](err)
+		internalCompilerErr, ok := errors.AsType[*internalCompilerError](err)
 		if !ok {
 			log.Fatalln("Could not cast error to internalCompilerError")
 		}
 
-		line, col := getLineColFromPosition(src, internalParserErr.pos)
+		line, col := getLineColFromPosition(src, internalCompilerErr.pos)
 
-		return nil, &CompilerError{
-			Message: internalParserErr.message,
+		return &CompilerError{
+			Message: internalCompilerErr.message,
 			Line:    line,
 			Col:     col,
 		}
 	}
 
-	return ast, nil
+	err = createBytecode(ast, out)
+	if err != nil {
+		internalCompilerErr, ok := errors.AsType[*internalCompilerError](err)
+		if !ok {
+			log.Fatalln("Could not cast error to internalCompilerError")
+		}
+
+		line, col := getLineColFromPosition(src, internalCompilerErr.pos)
+
+		return &CompilerError{
+			Message: internalCompilerErr.message,
+			Line:    line,
+			Col:     col,
+		}
+	}
+
+	return nil
 }
 
 func normalizeSource(src string) string {

@@ -7,15 +7,15 @@ import (
 	"testing"
 )
 
-func compareASTs(t *testing.T, expected Node, actual Node) {
-	expectedString := StringifyAST(expected)
-	actualString := StringifyAST(actual)
+func compareOutputs(t *testing.T, expected string, actual string) {
+	expected = strings.TrimRight(expected, "\n")
+	actual = strings.TrimRight(actual, "\n")
 
-	t.Logf("EXPECTED:\n%s\n", expectedString)
-	t.Logf("ACTUAL:\n%s\n", actualString)
+	t.Logf("EXPECTED:\n%s\n", expected)
+	t.Logf("ACTUAL:\n%s\n", actual)
 
-	expectedLines := strings.Split(expectedString, "\n")
-	actualLines := strings.Split(actualString, "\n")
+	expectedLines := strings.Split(expected, "\n")
+	actualLines := strings.Split(actual, "\n")
 
 	for i := 0; i < min(len(expectedLines), len(actualLines)); i++ {
 		if expectedLines[i] != actualLines[i] {
@@ -26,6 +26,12 @@ func compareASTs(t *testing.T, expected Node, actual Node) {
 	if len(expectedLines) != len(actualLines) {
 		t.Fatalf("Expected had %d lines while actual had %d lines\n", len(expectedLines), len(actualLines))
 	}
+}
+
+func compareASTs(t *testing.T, expected Node, actual Node) {
+	expectedString := StringifyAST(expected)
+	actualString := StringifyAST(actual)
+	compareOutputs(t, expectedString, actualString)
 }
 
 func parseExpr(src string) (Node, error) {

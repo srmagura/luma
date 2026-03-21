@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"io"
 )
 
@@ -47,5 +48,8 @@ func (cr *bytecodeCreator) evalModule(n ModuleNode) error {
 }
 
 func (cr *bytecodeCreator) evalIntLiteral(n IntLiteral) error {
-	return nil
+	code := []byte{OpLdcI4}
+	code = binary.BigEndian.AppendUint32(code, uint32(n.Value))
+	_, err := cr.out.Write(code)
+	return err
 }

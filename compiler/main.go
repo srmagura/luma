@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -12,17 +15,27 @@ func main() {
 		log.Fatalln("File path must be provided as a command-line argument.")
 	}
 
-	srcBytes, err := os.ReadFile(args[1])
+	srcFilename := args[1]
+	srcExt := filepath.Ext(srcFilename)
+	outFilename := strings.ReplaceAll(srcFilename, srcExt, ".bin")
+
+	srcBytes, err := os.ReadFile(srcFilename)
 	if err != nil {
 		log.Fatalln("Failed to read the source file.")
 	}
 
 	src := string(srcBytes)
 
-	ast, err := Compile(src)
+	f, err := os.Create(outFilename)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+	defer f.Close()
 
-	PrintAST(ast)
+	out := bufio.NewWriter(f)
+
+	err = Compile(src, out)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 }
