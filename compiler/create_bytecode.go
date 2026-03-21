@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
 )
 
@@ -28,8 +29,8 @@ func (cr *bytecodeCreator) evalNode(n Node) error {
 		return cr.evalCallExpr(v)
 	// case shared.UnaryExpr:
 	// 	return cr.evalUnaryExpr(v)
-	// case shared.BinaryExpr:
-	// 	return cr.evalBinaryExpr(v)
+	case BinaryExpr:
+		return cr.evalBinaryExpr(v)
 	// case shared.IdentNode:
 	// 	return cr.evalIdent(v)
 	case IntLiteral:
@@ -45,6 +46,64 @@ func (cr *bytecodeCreator) evalNode(n Node) error {
 func (cr *bytecodeCreator) evalModule(n ModuleNode) error {
 	// TODO
 	return cr.evalNode(n.Children[0])
+}
+
+func (cr *bytecodeCreator) evalBinaryExpr(n BinaryExpr) error {
+	err := cr.evalNode(n.Left)
+	if err != nil {
+		return err
+	}
+
+	err = cr.evalNode(n.Right)
+	if err != nil {
+		return err
+	}
+
+	switch n.Operator {
+	case OperatorAdd:
+		cr.out.Write([]byte{OpAdd})
+	// case shared.OpSubtract:
+	// 	return left - right, nil
+	// case shared.OpMultiply:
+	// 	return left * right, nil
+	// 	// TODO implement
+	// 	//case shared.OpDivide:
+	// 	//	return left / right
+	// case shared.OpDivideInteger:
+	// 	return left / right, nil
+	// 	// TODO implement booleans
+	// case shared.OpLessThan:
+	// 	if left < right {
+	// 		return 1, nil
+	// 	} else {
+	// 		return 0, nil
+	// 	}
+	// case shared.OpGreaterThan:
+	// 	if left > right {
+	// 		return 1, nil
+	// 	} else {
+	// 		return 0, nil
+	// 	}
+	// case shared.OpLessThanEq:
+	// 	if left <= right {
+	// 		return 1, nil
+	// 	} else {
+	// 		return 0, nil
+	// 	}
+	// case shared.OpGreaterThanEq:
+	// 	if left >= right {
+	// 		return 1, nil
+	// 	} else {
+	// 		return 0, nil
+	// 	}
+	default:
+		return &internalCompilerError{
+			message: fmt.Sprintf("Unexpected binary operator: %s", n.Operator),
+			pos:     n.Pos,
+		}
+	}
+
+	return nil
 }
 
 func (cr *bytecodeCreator) evalCallExpr(n CallExpr) error {

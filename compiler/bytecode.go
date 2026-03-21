@@ -9,11 +9,9 @@ import (
 type Op byte
 
 const (
-	//  ldc.i4 <int32> - Load constant 4-byte int to the stack
-	OpLdcI4 = 0x20
-
-	// print - Print 4-byte int
-	OpPrint = 0x02
+	OpLdcI4 = 0x20 // ldc.i4 <int32> - Load constant 4-byte int to the stack
+	OpAdd   = 0x58 // add - Add two values
+	OpPrint = 0x02 // print - Print 4-byte int
 )
 
 func PrintBytecode(code []byte) {
@@ -34,6 +32,8 @@ outer:
 			i += 4
 
 			fmt.Fprintf(&sb, "ldc.i4 %d\n", value)
+		case OpAdd:
+			fmt.Fprint(&sb, "add\n")
 		case OpPrint:
 			fmt.Fprint(&sb, "print\n")
 		default:

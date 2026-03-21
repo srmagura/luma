@@ -31,3 +31,13 @@ print
 	`
 	testSuccessfulCompilation(t, src, expected)
 }
+
+func TestAddition(t *testing.T) {
+	src := "1 + 2;"
+	expected := `
+ldc.i4 1
+ldc.i4 2
+add
+	`
+	testSuccessfulCompilation(t, src, expected)
+}

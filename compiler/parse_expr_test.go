@@ -86,25 +86,25 @@ func testSuccessfulExprParse(t *testing.T, src string, expected Node) {
 	compareASTs(t, expected, actual)
 }
 
-func TestInvalidToken(t *testing.T) {
+func TestParseInvalidToken(t *testing.T) {
 	src := "1@"
 	expectedMessage := "Unknown token: @"
 	testFailedExprParse(t, src, expectedMessage, 0)
 }
 
-func TestIntLiteral(t *testing.T) {
+func TestParseIntLiteral(t *testing.T) {
 	src := "2"
 	expected := IntLiteral{Value: 2}
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestIdent(t *testing.T) {
+func TestParseIdent(t *testing.T) {
 	src := "x"
 	expected := IdentNode{Name: "x"}
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestPositive(t *testing.T) {
+func TestParsePositive(t *testing.T) {
 	src := "+1"
 	expected := UnaryExpr{
 		Operator: OperatorPositive,
@@ -113,7 +113,7 @@ func TestPositive(t *testing.T) {
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestNegate(t *testing.T) {
+func TestParseNegate(t *testing.T) {
 	src := "+-1"
 	expected := UnaryExpr{
 		Operator: OperatorPositive,
@@ -125,7 +125,7 @@ func TestNegate(t *testing.T) {
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestPostfixIncrement(t *testing.T) {
+func TestParsePostfixIncrement(t *testing.T) {
 	src := "x++"
 	expected := UnaryExpr{
 		Operator: OperatorPostfixIncrement,
@@ -134,7 +134,7 @@ func TestPostfixIncrement(t *testing.T) {
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestAddition(t *testing.T) {
+func TestParseAddition(t *testing.T) {
 	src := "2 - 3 + 4"
 	expected := BinaryExpr{
 		Operator: OperatorAdd,
@@ -148,7 +148,7 @@ func TestAddition(t *testing.T) {
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestMultiplication(t *testing.T) {
+func TestParseMultiplication(t *testing.T) {
 	src := "5 / 2 * 3 ~/ 7"
 	expected := BinaryExpr{
 		Operator: OperatorDivideInteger,
@@ -166,7 +166,7 @@ func TestMultiplication(t *testing.T) {
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestCall1(t *testing.T) {
+func TestParseCall1(t *testing.T) {
 	src := "print()"
 	expected := CallExpr{
 		Func: IdentNode{Name: "print"},
@@ -175,7 +175,7 @@ func TestCall1(t *testing.T) {
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestCall2(t *testing.T) {
+func TestParseCall2(t *testing.T) {
 	src := "print(2 * 3)"
 	expected := CallExpr{
 		Func: IdentNode{Name: "print"},
@@ -190,7 +190,7 @@ func TestCall2(t *testing.T) {
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestCall3(t *testing.T) {
+func TestParseCall3(t *testing.T) {
 	src := "print(2 * 3, 4, 5)"
 	expected := CallExpr{
 		Func: IdentNode{Name: "print"},
@@ -207,13 +207,13 @@ func TestCall3(t *testing.T) {
 	testSuccessfulExprParse(t, src, expected)
 }
 
-func TestCall4(t *testing.T) {
+func TestParseCall4(t *testing.T) {
 	src := "print(2 4)"
 	expectedMessage := "Arguments were not separated by a comma in a call expression"
 	testFailedExprParse(t, src, expectedMessage, 0)
 }
 
-func TestComparison(t *testing.T) {
+func TestParseComparison(t *testing.T) {
 	src := "0 * 1 > 2 + 3"
 	expected := BinaryExpr{
 		Operator: OperatorGreaterThan,

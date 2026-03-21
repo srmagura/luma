@@ -17,7 +17,7 @@ func main() {
 
 	srcFilename := args[1]
 	srcExt := filepath.Ext(srcFilename)
-	outFilename := strings.ReplaceAll(srcFilename, srcExt, ".bin")
+	outFilename := strings.ReplaceAll(srcFilename, srcExt, ".out")
 
 	srcBytes, err := os.ReadFile(srcFilename)
 	if err != nil {

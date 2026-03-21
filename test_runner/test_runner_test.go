@@ -2,9 +2,13 @@ package testrunner
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 )
+
+// To execute these tests, run test.sh in the repository root directory
 
 // Prefix a test file with _ to make it not run
 func TestAll(t *testing.T) {
@@ -28,31 +32,25 @@ func TestAll(t *testing.T) {
 }
 
 func runTest(t *testing.T, srcPath string) {
-	srcBytes, err := os.ReadFile(srcPath)
+	compilerOutput, err := exec.Command("../compiler/lumac", srcPath).Output()
 	if err != nil {
-		t.Fatal("Failed to read the source file.")
+		t.Fatalf("Compilation failed:\n%s", compilerOutput)
 	}
 
-	src := string(srcBytes)
+	expectedPath := strings.ReplaceAll(srcPath, ".luma", ".expected")
+	expectedBytes, err := os.ReadFile(expectedPath)
+	if err != nil {
+		t.Fatal("Failed to read the expected output file.")
+	}
 
-	t.Log(src)
-
-	// var actualOutputBuilder strings.Builder
-	// runtime.Execute(ast, &actualOutputBuilder)
-
-	// outPath := strings.ReplaceAll(srcPath, ".luma", ".out")
-	// outBytes, err := os.ReadFile(outPath)
-	// if err != nil {
-	// 	t.Fatal("Failed to read the output file.")
-	// }
-
-	// expectedOutput := strings.TrimRight(string(outBytes), "\n")
+	expectedOutput := strings.TrimRight(string(expectedBytes), "\n")
+	actualOutput := ""
 	// actualOutput := strings.TrimRight(actualOutputBuilder.String(), "\n")
 
-	// t.Logf("EXPECTED:\n%s\n", expectedOutput)
-	// t.Logf("ACTUAL:\n%s\n", actualOutput)
+	t.Logf("EXPECTED:\n%s\n", expectedOutput)
+	t.Logf("ACTUAL:\n%s\n", actualOutput)
 
-	// if expectedOutput != actualOutput {
-	// 	t.Fatal("Output did not match")
-	// }
+	if expectedOutput != actualOutput {
+		t.Fatal("Output did not match")
+	}
 }
