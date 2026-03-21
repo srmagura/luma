@@ -24,7 +24,10 @@ func testSuccessfulCompilation(t *testing.T, src string, expected string) {
 }
 
 func TestHelloWorld(t *testing.T) {
-	src := "1;"
-	expected := "ldc.i4 1"
+	src := "print(1);"
+	expected := `
+ldc.i4 1
+print
+	`
 	testSuccessfulCompilation(t, src, expected)
 }

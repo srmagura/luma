@@ -13,7 +13,7 @@ const (
 	OpLdcI4 = 0x20
 
 	// print - Print 4-byte int
-	Print = 0x02
+	OpPrint = 0x02
 )
 
 func PrintBytecode(code []byte) {
@@ -34,7 +34,7 @@ outer:
 			i += 4
 
 			fmt.Fprintf(&sb, "ldc.i4 %d\n", value)
-		case Print:
+		case OpPrint:
 			fmt.Fprint(&sb, "print\n")
 		default:
 			fmt.Fprintf(&sb, "Unknown opcode: %#X\n", op)

@@ -8,8 +8,8 @@ import (
 )
 
 func compareOutputs(t *testing.T, expected string, actual string) {
-	expected = strings.TrimRight(expected, "\n")
-	actual = strings.TrimRight(actual, "\n")
+	expected = strings.Trim(expected, " \n\r\t")
+	actual = strings.Trim(actual, " \n\r\t")
 
 	t.Logf("EXPECTED:\n%s\n", expected)
 	t.Logf("ACTUAL:\n%s\n", actual)

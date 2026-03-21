@@ -24,8 +24,8 @@ func (cr *bytecodeCreator) evalNode(n Node) error {
 	// 	return cr.evalDeclarationStatement(v)
 	// case shared.AssignmentStatement:
 	// 	return cr.evalAssignmentStatement(v)
-	//case CallExpr:
-	// 	return cr.evalCallExpr(v)
+	case CallExpr:
+		return cr.evalCallExpr(v)
 	// case shared.UnaryExpr:
 	// 	return cr.evalUnaryExpr(v)
 	// case shared.BinaryExpr:
@@ -45,6 +45,33 @@ func (cr *bytecodeCreator) evalNode(n Node) error {
 func (cr *bytecodeCreator) evalModule(n ModuleNode) error {
 	// TODO
 	return cr.evalNode(n.Children[0])
+}
+
+func (cr *bytecodeCreator) evalCallExpr(n CallExpr) error {
+	for _, v := range n.Args {
+		err := cr.evalNode(v)
+		if err != nil {
+			return err
+		}
+	}
+
+	switch v := n.Func.(type) {
+	case IdentNode:
+		if v.Name == "print" {
+			cr.out.Write([]byte{OpPrint})
+			return nil
+		}
+
+		return &internalCompilerError{
+			message: "print is the only valid function currently",
+			pos:     v.Pos,
+		}
+	default:
+		return &internalCompilerError{
+			message: "Only identifiers are valid as a function",
+			pos:     n.Pos,
+		}
+	}
 }
 
 func (cr *bytecodeCreator) evalIntLiteral(n IntLiteral) error {
