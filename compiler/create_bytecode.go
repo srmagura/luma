@@ -4,16 +4,16 @@ import (
 	"io"
 )
 
-type ilCreator struct {
+type bytecodeCreator struct {
 	out io.Writer
 }
 
-func createIL(ast Node, out io.Writer) error {
-	cr := &ilCreator{out}
+func createBytecode(ast Node, out io.Writer) error {
+	cr := &bytecodeCreator{out}
 	return cr.evalNode(ast)
 }
 
-func (cr *ilCreator) evalNode(n Node) error {
+func (cr *bytecodeCreator) evalNode(n Node) error {
 	switch v := n.(type) {
 	case ModuleNode:
 		return cr.evalModule(v)
@@ -41,11 +41,11 @@ func (cr *ilCreator) evalNode(n Node) error {
 	}
 }
 
-func (cr *ilCreator) evalModule(n ModuleNode) error {
+func (cr *bytecodeCreator) evalModule(n ModuleNode) error {
 	// TODO
 	return cr.evalNode(n.Children[0])
 }
 
-func (cr *ilCreator) evalIntLiteral(n IntLiteral) error {
+func (cr *bytecodeCreator) evalIntLiteral(n IntLiteral) error {
 	return nil
 }
