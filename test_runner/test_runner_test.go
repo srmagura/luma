@@ -18,8 +18,7 @@ func TestAll(t *testing.T) {
 	}
 
 	for _, entry := range entries {
-		if !entry.IsDir() &&
-			filepath.Ext(entry.Name()) == ".luma" &&
+		if entry.IsDir() &&
 			filepath.Base(entry.Name())[0] != '_' {
 			t.Run(
 				filepath.Base(entry.Name()),
@@ -31,13 +30,17 @@ func TestAll(t *testing.T) {
 	}
 }
 
-func runTest(t *testing.T, srcPath string) {
-	compilerOutput, err := exec.Command("../compiler/lumac", srcPath).Output()
+func runTest(t *testing.T, dirPath string) {
+	dirName := filepath.Base(dirPath)
+	srcPath := filepath.Join(dirPath, dirName+".luma")
+	//outPath := filepath.Join(dirPath, dirName+".out")
+	expectedPath := filepath.Join(dirPath, dirName+".expected")
+
+	compilerOutput, err := exec.Command("../compiler/lumac", srcPath, "--dasm").Output()
 	if err != nil {
 		t.Fatalf("Compilation failed:\n%s", compilerOutput)
 	}
 
-	expectedPath := strings.ReplaceAll(srcPath, ".luma", ".expected")
 	expectedBytes, err := os.ReadFile(expectedPath)
 	if err != nil {
 		t.Fatal("Failed to read the expected output file.")
