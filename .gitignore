@@ -1,3 +1,4 @@
 lumac
 *.out
 *.asm
+runtime/target/
